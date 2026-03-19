@@ -1,7 +1,9 @@
 import { ownCommands } from '@lib/commands/command.registry';
+import { KiwiConfig } from '@lib/config/config.types';
 
 export interface CommandContext {
   args: string[];
+  config: KiwiConfig;
 }
 
 export interface Command {

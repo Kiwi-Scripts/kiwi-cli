@@ -1,3 +1,4 @@
+import healthCommand from '@commands/health.cmd';
 import helpCommand from '@commands/help.cmd';
 import versionCommand from '@commands/version.cmd';
 import { Command, KnownCommands } from '@lib/commands/command.types';
@@ -7,7 +8,8 @@ const commands = new Map<string, Command>();
 
 export const ownCommands = [
   helpCommand,
-  versionCommand
+  versionCommand,
+  healthCommand
 ] as const;
 ownCommands.forEach(registerCommand);
 

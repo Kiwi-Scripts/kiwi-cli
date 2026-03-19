@@ -9,11 +9,13 @@ A CLI tool that adds a custom scripting layer to existing CLI workflows, redirec
 Core dispatch loop: parse input, match against known commands, passthrough everything else.
 
 - [x] **CLI entry & arg extraction:** Strip binary name, extract command + rest args without a heavy arg parser
-- [ ] **Config loader:** Discover and load `kiwi.config.ts` (or `.js` / `.json`) from project root
+- [x] **Config loader:** Discover and load `kiwi.config.ts` (or `.js` / `.json`) from project root
 - [x] **Dispatcher:** Central router: command name → handler lookup → passthrough fallback
 - [x] **Passthrough with interactivity:** `child_process.spawn` with `stdio: 'inherit'`, exit code forwarding
 - [ ] **Built-in commands:** `help`, `version`, `init`
+  - [x] *health*
   - [x] *help*
+  - [ ] *init*
   - [x] *version*
 - [x] **Exit code propagation:** Forward child process exit code as kiwi's own
 
@@ -36,7 +38,7 @@ Polish, error handling, and quality-of-life features.
 - [ ] **`--dry-run` flag:** Print commands that would execute without running them
 - [ ] **`--verbose` flag:** Show dispatcher decisions, config loading, script discovery
 - [ ] **Structured logging:** Prefixed, leveled output (`log`, `warn`, `error`) via context logger
-- [ ] **Command associations:** Configure default mappings for commands and their targeted cli (`fetch` -> `git`)\
+- [x] **Command associations:** Configure default mappings for commands and their targeted cli (`fetch` -> `git`)\
 If a command can be handled by a script, but not in all cases, it gets redirected to the correct cli as a fallback.
 
 ## Phase 4 — Expansion
@@ -44,8 +46,7 @@ If a command can be handled by a script, but not in all cases, it gets redirecte
 Optional features for power users and advanced workflows.
 
 - [ ] **Hooks / lifecycle:** `pre:<command>` and `post:<command>` hooks around any command
-- [ ] **Multi-target CLI:** Config declares multiple targets; dispatch by prefix (`kiwi git ...`, `kiwi ng ...`)
-- [ ] **Aliases:** Shorthand mappings in config (`c → commit`, `s → status`)
+- [x] **Aliases:** Shorthand mappings in config (`c → commit`, `s → status`)
 - [ ] **Shared script packages:** npm packages that export kiwi commands (plugin system)
 - [ ] **Shell completions:** Generate completion scripts for bash, zsh, PowerShell
 - [ ] **Pipeline chains:** Sequential script execution with typed inter-script data passing

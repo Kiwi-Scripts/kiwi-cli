@@ -1,0 +1,97 @@
+import DEFAUL_CONFIG from '@lib/config/config.default';
+import { KiwiConfig } from '@lib/config/config.types';
+import logger from '@lib/util/logger';
+import { kiwiPathsGlobal } from '@lib/util/paths';
+import fs from 'node:fs';
+import path from 'node:path';
+import url from 'node:url';
+
+const CONFIG_FILENAME_EXTENSIONS = [
+  // typescript
+  ['.ts', '.mts', '.cts'],
+  // raw javascript
+  ['.js', '.mjs', '.cjs'],
+  // plain JSON
+  ['.json']
+];
+const CONFIG_FILENAME = 'kiwi.config'
+
+export async function loadConfig() {
+  const projectConfigFile = doFindConfigFile(kiwiPathsGlobal.projectRoot);
+  const userConfigFile = doFindConfigFile(kiwiPathsGlobal.userHome);
+  
+  const userConfig = userConfigFile ? await loadConfigFile(userConfigFile) : {};
+  const projectConfig = projectConfigFile ? await loadConfigFile(projectConfigFile) : {};
+
+  const merged = mergeConfigs(userConfig, projectConfig);
+  const defaultConfig = {...DEFAUL_CONFIG};
+  if (merged.disableDefaultAssociations) delete defaultConfig.associations;
+  if (merged.disableDefaultAliases) delete defaultConfig.aliases;
+  return mergeConfigs(defaultConfig, merged);
+}
+
+function doFindConfigFile(dir: string) {
+  for (const ext of CONFIG_FILENAME_EXTENSIONS.flat()) {
+    const candidate = path.join(dir, CONFIG_FILENAME + ext);
+    if (fs.existsSync(candidate)) {
+      // max one config per dir
+      return candidate;
+    }
+  }
+}
+
+async function loadConfigFile(filePath: string) {
+  const abs = kiwiPathsGlobal.resolve(filePath);
+  const ext = path.extname(abs);
+
+  if (ext === '.json') {
+    const raw = fs.readFileSync(abs, 'utf8');
+    return JSON.parse(raw) as KiwiConfig;
+  }
+
+  if (CONFIG_FILENAME_EXTENSIONS[1].includes(ext)) {
+    const mod = await import(url.pathToFileURL(abs).href);
+    return (mod.default ?? mod) as KiwiConfig;
+  }
+
+  if(CONFIG_FILENAME_EXTENSIONS[0].includes(ext)) {
+    try {
+      const { tsImport } = await import('tsx/esm/api');
+      const mod = await tsImport(url.pathToFileURL(abs).href, {
+        parentURL: import.meta.url
+      });
+      return (mod.default ?? mod) as KiwiConfig;
+    } catch (error) {
+      logger.warn(`TypeScript config detected: ${filePath}`);
+      logger.log('  Loading .ts config files requires the optional dependency "tsx".');
+      logger.log('  Install it with: npm install tsx');
+      logger.log('  Or use kiwi.config.js / kiwi.config.json instead.')
+      console.error(error);
+    }
+  }
+
+  throw new Error(`Unsupported config format: ${filePath}, ${ext}`);
+}
+
+function mergeConfigs(base: KiwiConfig, override: KiwiConfig) {
+  const merged: KiwiConfig = {
+    scriptsDir: override.scriptsDir ?? base.scriptsDir,
+    pathLabels: {...base.pathLabels, ...override.pathLabels},
+    aliases: {...base.aliases, ...override.aliases},
+    associations: mergeAssociations(base.associations, override.associations),
+    disableDefaultAssociations: override.disableDefaultAssociations ?? base.disableDefaultAssociations ,
+    disableDefaultAliases: override.disableDefaultAliases ?? base.disableDefaultAliases
+  }
+  return merged;
+}
+
+function mergeAssociations(base: KiwiConfig['associations'], override: KiwiConfig['associations']) {
+  const merged = {...base};
+  if (override) {
+    Object.keys(override).forEach(key => {
+      const existing = merged[key] ?? [];
+      merged[key] = [...existing, ...override[key]];
+    });
+  }
+  return merged;
+}

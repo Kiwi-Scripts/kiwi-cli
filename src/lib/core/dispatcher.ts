@@ -1,4 +1,5 @@
 import { getCommand } from '@lib/commands/command.registry';
+import { KiwiConfig } from '@lib/config/config.types';
 import { passthrough } from '@lib/core/passthrough';
 
 export interface DispatchOptions {
@@ -13,15 +14,15 @@ export function parseArgv(argv: string[]) {
   return {command, args};
 }
 
-export async function dispatch(command: string, args: string[], options: DispatchOptions = {}) {
+export async function dispatch(command: string, args: string[], config: KiwiConfig = {}) {
   if (!command) {
     const help = getCommand('help');
-    return await help.run({args: []});
+    return await help.run({args: [], config});
   }
 
   const handler = getCommand(command);
   if (handler) {
-    return await handler.run({args});
+    return await handler.run({args, config});
   }
 
   const exitCode = await passthrough(command, args);

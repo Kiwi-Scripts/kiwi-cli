@@ -1,5 +1,6 @@
 import lazySingleton from '@lib/util/lazy-singleton';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 export type PathLabels = Record<string, string>;
@@ -59,14 +60,28 @@ export interface ResolvePathOptions {
 }
 
 export class PathResolver {
+  /** The `cwd` specified via options or inherited from the process. Never `null`. */
   public readonly cwd: string;
+  /** The resolved root directory of the enclosing project, or `cwd` if none was found. Never `null`. */
   public readonly projectRoot: string;
+  /**
+   * True, if the `projectRoot` was successfully resolved independently.\
+   * As `cwd` is used as a fallback for an unresolved root but can also be identical to the resolved root, this is necessary to differentiate the two cases.
+   */
+  public readonly hasProjectRoot: boolean;
+  /**
+   * The users home directory.
+   */
+  public readonly userHome: string;
   private readonly labels: Map<string, string>;
   private readonly defaultBaseLabel: string;
 
   constructor(options: PathResolverOptions = {}) {
     this.cwd = path.resolve(options.cwd ?? process.cwd());
-    this.projectRoot = findProjectRoot(this.cwd, options.rootMarkers, options.requireProjectRoot ?? true);
+    const resolvedProjectRoot = findProjectRoot(this.cwd, options.rootMarkers, options.requireProjectRoot ?? true);
+    this.projectRoot = resolvedProjectRoot ?? this.cwd;
+    this.hasProjectRoot = !!resolvedProjectRoot;
+    this.userHome = os.homedir();
     this.labels = new Map<string, string>();
 
     this.registerLabel('@cwd', this.cwd);
@@ -209,6 +224,7 @@ export class PathResolver {
  * Requires execution within a project directory context.
  */
 export const kiwiPaths = lazySingleton(PathResolver);
+export const kiwiPathsGlobal = new PathResolver({requireProjectRoot: false});
 export default kiwiPaths;
 
 /**
@@ -259,7 +275,7 @@ export function findProjectRoot(
   startDir: string = process.cwd(),
   extraMarkers: string[] = [],
   requireProjectRoot: boolean = true,
-): string {
+): string | null {
   const markers = ['package.json', 'angular.json', ...extraMarkers];
   let current = path.resolve(startDir);
 
@@ -280,7 +296,7 @@ export function findProjectRoot(
         );
       }
 
-      return path.resolve(startDir);
+      return null;
     }
 
     current = parent;

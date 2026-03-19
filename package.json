@@ -8,10 +8,22 @@
   ],
   "license": "MIT",
   "author": "Miya",
+
   "type": "module",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "bin": {
     "kiwi": "./dist/cli.js"
   },
+  
   "engines": {
     "node": ">=18"
   },
@@ -30,5 +42,8 @@
     "@types/node": "^25.5.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
+  },
+  "optionalDependencies": {
+    "tsx": "^4.21.0"
   }
 }
