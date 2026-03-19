@@ -1,15 +1,8 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --no-deprecation
 
-import kiwiPaths from '@lib/util/paths';
-import version from '@lib/version';
-import chalk from 'chalk';
+import { dispatch, parseArgv } from '@lib/core/dispatcher';
+import { suppressDEP0190 } from '@lib/util/node-patch';
+suppressDEP0190();
 
-const prefix = chalk.magenta('[kiwi]');
-
-if (process.argv.includes('--version') || process.argv.includes('-v')) {
-  console.log(`${prefix} Version: ${version}`);
-  console.log(`${prefix} Loc: ${kiwiPaths.cwd}`);
-  process.exit(0);
-}
-
-console.log(`${prefix} The cli works!`);
+const {command, args} = parseArgv(process.argv);
+dispatch(command, args);

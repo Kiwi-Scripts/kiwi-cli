@@ -13,7 +13,8 @@
     "noEmitOnError": true,
     "baseUrl": "src",
     "paths": {
-      "@lib/*": ["lib/*"]
+      "@commands/*": ["lib/commands/own/*"],
+      "@lib/*": ["lib/*"],
     }
   },
   "include": ["src"]
