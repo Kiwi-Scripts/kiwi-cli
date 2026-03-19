@@ -1,0 +1,15 @@
+{
+	"markdown.extension.preview.autoShowPreviewToSide": true,
+	"todo-tree.highlights.enabled": false,
+	"editor.indentSize": "tabSize",
+	"editor.tabSize": 2,
+	"editor.detectIndentation": false,
+	"js/ts.preferences.importModuleSpecifier": "non-relative",
+	"js/ts.preferences.quoteStyle": "single",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.ts": "explicit",
+    "source.addMissingImports.ts": "explicit",
+    "source.removeUnusedImports": "explicit",
+    "source.sortImports": "explicit"
+  } 
+}
