@@ -1,10 +1,10 @@
-import { KiwiConfig } from '@lib/config/config.types';
+import { KiwiConfigInternal } from '@lib/config/config.types';
 
 export interface CommandContext {
   targetCli?: string;
   command: string;
   args: string[];
-  config: KiwiConfig;
+  config: KiwiConfigInternal;
 }
 
 export interface Command {

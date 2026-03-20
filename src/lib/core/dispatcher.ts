@@ -1,6 +1,6 @@
 import { getCommand } from '@lib/commands/command.registry';
 import { CommandContext } from '@lib/commands/command.types';
-import { KiwiConfig } from '@lib/config/config.types';
+import { KiwiConfig, KiwiConfigInternal } from '@lib/config/config.types';
 import { passthrough } from '@lib/core/passthrough';
 import logger, { setLogLevel } from '@lib/util/logger';
 
@@ -23,7 +23,7 @@ export function parseArgv(argv: string[]) {
  * @param config The Kiwi configuration object containing aliases and associations.
  * @returns The result of the command execution.
  */
-export async function dispatch(command: string | undefined, args: string[], config: KiwiConfig = {}) {
+export async function dispatch(command: string | undefined, args: string[], config: KiwiConfigInternal) {
   if (!command) {
     const help = getCommand('help');
     return await help.run({ command: 'help', args, config });
@@ -53,7 +53,7 @@ export async function dispatch(command: string | undefined, args: string[], conf
  * @param config The Kiwi configuration object containing aliases and associations.
  * @returns The resolved command context.
  */
-function resolveCommandContext(command: string, args: string[], config: KiwiConfig): CommandContext {
+function resolveCommandContext(command: string, args: string[], config: KiwiConfigInternal): CommandContext {
   const resolvedCommand = resolveAlias(command, config);
   const targetCli = resolveAssociation(resolvedCommand, config);
   return {
