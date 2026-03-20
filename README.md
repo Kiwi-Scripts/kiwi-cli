@@ -1,4 +1,4 @@
-# 🥝 Kiwi-CLI
+# 🥝 Kiwi-CLI - ALPHA (WIP)
 
 CLI helper that allows expanding on other CLI-tools by adding a custom scripting layer for an improved workflow. Redirects all unhandled input to the specified 3rd party CLI.
 
@@ -6,20 +6,19 @@ This is usefull for automated logic that is too complex for that CLIs native fun
 
 ## Installation
 
-While not published as an npm package, the installation looks like this:
-
 ```bash
-# clone the project repo
-git clone git@github.com:Kiwi-Scripts/kiwi-cli.git
-
-# build the project
-cd kiwi-cli
-npm run build
-
 # install as global npm package
-npm i -g .
+npm i -g @kiwi-js/cli
 ```
 
-This will build the project, compiling the source files into JS in the `dist/` dir. By executing `npm i -g .` the current package gets added as global dependency.
+## Usage
 
-The CLI will now be available as `kiwi` in any terminal. (Existing terminal instance may need to be restarted)
+The CLI will be available as `kiwi` in the terminal.
+
+By default, command mappings for `git` and `ng` are included allowing the use of both through the kiwi interface.\
+More documentation will be added during the development and before the first major release.
+
+## Disclaimer
+
+This is a very early build and still not reliably tested. No real action has been added yet, so it is effectively an alias combining `git` and `ng` into one cli.\
+The `ROADMAP.md` on the GitHub page outlines current state of development and planned features.

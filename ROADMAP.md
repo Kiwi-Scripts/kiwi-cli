@@ -36,8 +36,8 @@ Polish, error handling, and quality-of-life features.
 - [ ] **`kiwi init` scaffolding:** Generate `kiwi.config.ts` + `.kiwi/scripts/` directory with example script
 - [ ] **Pretty error output:** Catch script errors, display context, suggest fixes
 - [ ] **`--dry-run` flag:** Print commands that would execute without running them
-- [ ] **`--verbose` flag:** Show dispatcher decisions, config loading, script discovery
-- [ ] **Structured logging:** Prefixed, leveled output (`log`, `warn`, `error`) via context logger
+- [x] **`--verbose` flag:** Show dispatcher decisions, config loading, script discovery
+- [x] **Structured logging:** Prefixed, leveled output (`log`, `warn`, `error`) via context logger
 - [x] **Command associations:** Configure default mappings for commands and their targeted cli (`fetch` -> `git`)\
 If a command can be handled by a script, but not in all cases, it gets redirected to the correct cli as a fallback.
 
