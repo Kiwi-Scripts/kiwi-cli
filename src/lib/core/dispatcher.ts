@@ -22,13 +22,13 @@ export function parseArgv(argv: string[]) {
  * @param config The Kiwi configuration object containing aliases and associations.
  * @returns The result of the command execution.
  */
-export async function dispatch(command: string, args: string[], config: KiwiConfig = {}) {
-  const ctx = resolveCommandContext(command, args, config);
-
+export async function dispatch(command: string | undefined, args: string[], config: KiwiConfig = {}) {
   if (!command) {
     const help = getCommand('help');
-    return await help.run(ctx);
+    return await help.run({ command: 'help', args, config });
   }
+  
+  const ctx = resolveCommandContext(command, args, config);
 
   const handler = getCommand(command);
   if (handler) {
@@ -36,7 +36,7 @@ export async function dispatch(command: string, args: string[], config: KiwiConf
   }
 
   const [targetCli, ...params] = ctx.targetCli ? [ctx.targetCli, ctx.command, ...ctx.args] : [ctx.command, ...ctx.args];
-  const exitCode = await passthrough(targetCli, ...params);
+  const exitCode = await passthrough(targetCli, params);
   process.exitCode = exitCode;
 }
 

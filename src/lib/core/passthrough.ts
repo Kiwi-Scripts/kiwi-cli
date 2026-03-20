@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 
-export function passthrough(targetCli: string, ...args: string[]): Promise<number> {
+export function passthrough(targetCli: string, args: string[]): Promise<number> {
   return new Promise((resolve, reject) => {
     const child = spawn(targetCli, args, {
       stdio: 'inherit',

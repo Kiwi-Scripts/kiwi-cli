@@ -1,4 +1,4 @@
-import DEFAUL_CONFIG from '@lib/config/config.default';
+import DEFAULT_CONFIG from '@lib/config/config.default';
 import { KiwiConfig } from '@lib/config/config.types';
 import logger from '@lib/util/logger';
 import { kiwiPathsGlobal } from '@lib/util/paths';
@@ -24,7 +24,7 @@ export async function loadConfig() {
   const projectConfig = projectConfigFile ? await loadConfigFile(projectConfigFile) : {};
 
   const merged = mergeConfigs(userConfig, projectConfig);
-  const defaultConfig = {...DEFAUL_CONFIG};
+  const defaultConfig = {...DEFAULT_CONFIG};
   if (merged.disableDefaultAssociations) delete defaultConfig.associations;
   if (merged.disableDefaultAliases) delete defaultConfig.aliases;
   return mergeConfigs(defaultConfig, merged);

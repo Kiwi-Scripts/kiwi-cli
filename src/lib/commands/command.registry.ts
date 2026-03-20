@@ -1,11 +1,13 @@
 import healthCommand from '@commands/health.cmd';
 import helpCommand from '@commands/help.cmd';
 import versionCommand from '@commands/version.cmd';
-import { Command, KnownCommands } from '@lib/commands/command.types';
+import { Command } from '@lib/commands/command.types';
 import logger from '@lib/util/logger';
 
 const commands = new Map<string, Command>();
 
+/** A union of all known (i.e. built-in) commands. */
+export type KnownCommands = typeof ownCommands[number]['name'];
 export const ownCommands = [
   helpCommand,
   versionCommand,

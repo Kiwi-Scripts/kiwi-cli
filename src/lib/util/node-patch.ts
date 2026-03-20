@@ -1,8 +1,9 @@
 export function suppressDEP0190() {
-  process.removeAllListeners('warning');
-  process.on('warning', warning => {
-    if ((warning as any).code !== 'DEP0190') {
-      process.emitWarning(warning);
+  const originalEmit = process.emit;
+  process.emit = function (event: string, ...args: any[]) {
+    if (event === 'warning' && (args[0] as any)?.code === 'DEP0190') {
+      return false;
     }
-  });
+    return originalEmit.apply(process, [event, ...args] as any);
+  } as typeof process.emit;
 }

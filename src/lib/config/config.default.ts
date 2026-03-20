@@ -1,6 +1,6 @@
 import { KiwiConfig } from '@lib/config/config.types';
 
-const DEFAUL_CONFIG: KiwiConfig = {
+const DEFAULT_CONFIG: KiwiConfig = {
   associations: {
     git: [
       'am',
@@ -70,4 +70,4 @@ const DEFAUL_CONFIG: KiwiConfig = {
     l: 'lint',
   }
 }
-export default DEFAUL_CONFIG;
+export default DEFAULT_CONFIG;
