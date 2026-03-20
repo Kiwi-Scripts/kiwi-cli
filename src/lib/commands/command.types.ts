@@ -2,6 +2,8 @@ import { ownCommands } from '@lib/commands/command.registry';
 import { KiwiConfig } from '@lib/config/config.types';
 
 export interface CommandContext {
+  targetCli?: string;
+  command: string;
   args: string[];
   config: KiwiConfig;
 }
