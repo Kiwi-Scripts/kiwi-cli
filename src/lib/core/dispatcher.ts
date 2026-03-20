@@ -2,6 +2,7 @@ import { getCommand } from '@lib/commands/command.registry';
 import { CommandContext } from '@lib/commands/command.types';
 import { KiwiConfig } from '@lib/config/config.types';
 import { passthrough } from '@lib/core/passthrough';
+import logger, { setLogLevel } from '@lib/util/logger';
 
 export interface DispatchOptions {
   // Options for dispatch execution
@@ -27,14 +28,19 @@ export async function dispatch(command: string | undefined, args: string[], conf
     const help = getCommand('help');
     return await help.run({ command: 'help', args, config });
   }
+
+  handleVerbose(args);
   
   const ctx = resolveCommandContext(command, args, config);
+  logger.debug('Resolved command context:', ctx);
 
   const handler = getCommand(command);
   if (handler) {
+    logger.debug('Found handler for command:', command);
     return await handler.run(ctx);
   }
 
+  logger.debug('No handler found for command, checking for passthrough:', command);
   const [targetCli, ...params] = ctx.targetCli ? [ctx.targetCli, ctx.command, ...ctx.args] : [ctx.command, ...ctx.args];
   const exitCode = await passthrough(targetCli, params);
   process.exitCode = exitCode;
@@ -86,4 +92,10 @@ function resolveAlias(command: string, config: KiwiConfig) {
     return config.aliases[command];
   }
   return command;
+}
+
+function handleVerbose(args: string[]) {
+  if (args.includes('--verbose')) {
+    setLogLevel('debug');
+  }
 }

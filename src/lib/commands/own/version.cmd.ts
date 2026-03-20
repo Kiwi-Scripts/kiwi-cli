@@ -5,13 +5,14 @@ const versionCommand = {
   name: 'version',
   description: 'Prints the current kiwi-cli version.',
   run() {
-    logger.log();
-    logger.log('**********************');
-    logger.log('*  --- KIWI-CLI ---  *');
-    logger.log('**********************');
-    logger.log();
-    logger.log('Version:', version);
-    logger.log();
+    logger.np.log();
+    logger.ml.log(
+      '**********************',
+      '*  --- KIWI-CLI ---  *',
+      '**********************',
+      `\nVersion: ${version}`
+    );
+    logger.np.log();
   },
 } as const;
 export default versionCommand;

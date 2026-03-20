@@ -5,9 +5,8 @@ const healthCommand = {
   name: 'health',
   description: 'Prints the current status of the kiwi cli.',
   run(ctx) {
-    console.log()
-    logger.log('KIWI loaded successfully with merged configs:');
-    console.log(ctx.config);
+    logger.np.log()
+    logger.log('KIWI loaded successfully with merged configs:\n', ctx.config);
   },
 } as const satisfies Command;
 export default healthCommand;

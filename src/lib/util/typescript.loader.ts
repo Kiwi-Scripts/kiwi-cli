@@ -20,10 +20,11 @@ export async function loadTypeScriptModule(filePath: string) {
     return await importWithTsx(abs);
   } catch (error) {
     logger.warn(`TypeScript config detected: ${filePath}`);
-    logger.log('  Loading .ts config files requires the optional dependency "tsx".');
-    logger.log('  Install it with: npm install tsx');
-    logger.log('  Or use kiwi.config.js / kiwi.config.json instead.')
-    console.error(error);
+    logger.ml.indent().warn(
+      'Loading .ts config files requires the optional dependency "tsx".',
+      'Install it with: npm install tsx',
+      'Or use kiwi.config.js / kiwi.config.json instead.');
+    logger.error(error);
   }
 }
 

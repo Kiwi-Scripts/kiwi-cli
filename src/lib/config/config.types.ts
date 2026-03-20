@@ -86,6 +86,10 @@ export interface KiwiConfig {
   disableDefaultAliases?: boolean;
 }
 
+export interface KiwiConfigInternal extends KiwiConfig {
+  usedConfigFiles: string[];
+}
+
 /**
  * Typed helper function to define the config.
  * @usage
