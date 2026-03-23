@@ -12,10 +12,10 @@ Core dispatch loop: parse input, match against known commands, passthrough every
 - [x] **Config loader:** Discover and load `kiwi.config.ts` (or `.js` / `.json`) from project root
 - [x] **Dispatcher:** Central router: command name → handler lookup → passthrough fallback
 - [x] **Passthrough with interactivity:** `child_process.spawn` with `stdio: 'inherit'`, exit code forwarding
-- [ ] **Built-in commands:** `help`, `version`, `init`
+- [x] **Built-in commands:** `help`, `version`, `init`
   - [x] *health*
   - [x] *help*
-  - [ ] *init*
+  - [x] *init*
   - [x] *version*
 - [x] **Exit code propagation:** Forward child process exit code as kiwi's own
 
