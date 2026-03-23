@@ -21,6 +21,7 @@ interface Logger {
   readonly ml: StringLogger;
   readonly np: Logger;
   readonly indent: (amount?: number) => Logger;
+  readonly prefix: string;
 }
 
 interface StringLogger extends Logger {
@@ -83,8 +84,13 @@ class LoggerImpl implements Logger {
     np?: boolean;
   } = {};
 
+  get prefix() {
+    return this.config.prefix;
+  }
+
   constructor(config?: Partial<LoggerConfig>) {
     this.config = { ...defaultConfig, ...config, prefixColors: { ...defaultConfig.prefixColors, ...config?.prefixColors } };
+
   }
 
   debug(...data: any[]) {
@@ -130,6 +136,14 @@ class LoggerImpl implements Logger {
     this.config.level = level;
   }
 
+  setConfigValue<K extends keyof LoggerConfig>(key: K, value: LoggerConfig[K]) {
+    if (key === 'prefixColors') {
+      this.config.prefixColors = { ...this.config.prefixColors, ...(value as Partial<LoggerConfig['prefixColors']>) };
+      return;
+    }
+    this.config[key] = value;
+  }
+
   shouldLog(level: LogLevel): boolean {
     return logLevelPriority[level] >= logLevelPriority[this.config.level];
   }
@@ -150,7 +164,7 @@ class LoggerImpl implements Logger {
       const assembledMsg = `${timestamp}${prefix}${indent}${msg}`.trim();
       return [this.colorizeMsg(level, assembledMsg), data.slice(1)];
     }
-    const mlData = data.flatMap(d => d.split('\n')).map(d => `${timestamp}${prefix}${indent}${d}`.trim()).join('\n');
+    const mlData = data.flatMap(d => d.split('\n')).map(d => `${timestamp}${prefix}${indent}${d}`).join('\n');
     return [this.colorizeMsg(level, mlData), []];
   }
 
@@ -190,6 +204,14 @@ function setLogLevel(level: LogLevel, loggerInstance: Logger = logger) {
   throw new Error('Cannot set log level on provided logger instance');
 }
 
+function setConfigValue<K extends keyof LoggerConfig>(key: K, value: LoggerConfig[K], loggerInstance: Logger = logger) {
+  if (loggerInstance instanceof LoggerImpl) {
+    loggerInstance.setConfigValue(key, value);
+    return;
+  }
+  throw new Error('Cannot set config value on provided logger instance');
+}
+
 function loggerExampleUsage() {
   const log = getLog({ prefix: '[my-app]', showTimestamp: true, level: 'debug' });
   log.debug('This is a debug message');
@@ -204,6 +226,6 @@ function loggerExampleUsage() {
 }
 
 export default logger;
-export { ConsoleChannel, getLog, loggerExampleUsage, NullChannel, setLogLevel };
+export { ConsoleChannel, getLog, loggerExampleUsage, NullChannel, setConfigValue, setLogLevel };
 export type { LogChannel, Logger, LoggerConfig, LogLevel };
 
