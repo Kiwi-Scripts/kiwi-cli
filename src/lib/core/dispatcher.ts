@@ -1,6 +1,7 @@
 import { getCommand } from '@lib/commands/command.registry';
-import { CommandContext } from '@lib/commands/command.types';
+import { Command, CommandContext } from '@lib/commands/command.types';
 import { KiwiConfig, KiwiConfigInternal } from '@lib/config/config.types';
+import { parseCommandArgs } from '@lib/core/arg-parser';
 import { passthrough } from '@lib/core/passthrough';
 import logger, { setLogLevel } from '@lib/util/logger';
 
@@ -25,23 +26,28 @@ export function parseArgv(argv: string[]) {
  */
 export async function dispatch(command: string | undefined, args: string[], config: KiwiConfigInternal) {
   if (!command) {
-    const help = getCommand('help');
-    return await help.run({ command: 'help', args, config });
+    command = 'help';
+    logger.debug('No command provided. Defaulting to "help".');
+  }
+  if (args.includes('--help')) {
+    args = [command, ...args.filter(arg => arg !== '--help')];
+    command = 'help';
+    logger.debug('Help flag detected. Routing to "help" command with args:', args);
   }
 
   handleVerbose(args);
-  
-  const ctx = resolveCommandContext(command, args, config);
-  logger.debug('Resolved command context:', ctx);
 
-  const handler = getCommand(command);
+  const resolvedCommand = resolveAlias(command, config);
+  const handler = getCommand(resolvedCommand);
   if (handler) {
-    logger.debug('Found handler for command:', command);
+    logger.debug('Found handler for command:', resolvedCommand);
+    const ctx = resolveCommandContext(handler, args, config);
+    logger.debug('Resolved command context:', ctx);
     return await handler.run(ctx);
   }
 
-  logger.debug('No handler found for command, checking for passthrough:', command);
-  const [targetCli, ...params] = ctx.targetCli ? [ctx.targetCli, ctx.command, ...ctx.args] : [ctx.command, ...ctx.args];
+  logger.debug('No handler found for command, checking for passthrough:', resolvedCommand);
+  const [targetCli, ...params] = [resolveAssociation(resolvedCommand, config), resolvedCommand, ...args].filter(Boolean) as string[];
   const exitCode = await passthrough(targetCli, params);
   process.exitCode = exitCode;
 }
@@ -53,13 +59,15 @@ export async function dispatch(command: string | undefined, args: string[], conf
  * @param config The Kiwi configuration object containing aliases and associations.
  * @returns The resolved command context.
  */
-function resolveCommandContext(command: string, args: string[], config: KiwiConfigInternal): CommandContext {
-  const resolvedCommand = resolveAlias(command, config);
-  const targetCli = resolveAssociation(resolvedCommand, config);
+function resolveCommandContext(command: Command, args: string[], config: KiwiConfigInternal): CommandContext {
+  const targetCli = resolveAssociation(command.name, config);
+  const {positionalArgs, options} = parseCommandArgs(command, args);
   return {
     targetCli,
-    command: resolvedCommand,
-    args,
+    command: command.name,
+    rawArgs: args,
+    positionalArgs,
+    options,
     config
   }
 }
@@ -88,8 +96,10 @@ function resolveAssociation(command: string | undefined, config: KiwiConfig) {
  * @returns The resolved command if an alias is found, otherwise the original command.
  */
 function resolveAlias(command: string, config: KiwiConfig) {
-  if (config.aliases?.[command]) {
-    return config.aliases[command];
+  const resolved = config.aliases?.[command];
+  if (resolved) {
+    logger.debug(`Resolved alias '${command}' to '${resolved}'`);
+    return resolved;
   }
   return command;
 }

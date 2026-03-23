@@ -31,3 +31,12 @@ export function getCommand(name: string) {
 export function getAllCommands() {
   return [...commands.values()];
 }
+
+export function isKnownCommand(name: string): name is KnownCommands {
+  return commands.has(name);
+}
+
+export async function runHelpCommand(command: string, args: string[], config: any) {
+  const help = getCommand('help');
+  await help.run({ command, rawArgs: args, config, positionalArgs: {}, options: {} });
+}
