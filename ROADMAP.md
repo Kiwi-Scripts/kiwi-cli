@@ -23,7 +23,7 @@ Core dispatch loop: parse input, match against known commands, passthrough every
 
 User-defined commands via `.kiwi/scripts/` directory with TypeScript support.
 
-- [ ] **`defineCommand()` API:** Typed helper for declaring commands with name, description, args schema, and handler
+- [x] **`defineCommand()` API:** Typed helper for declaring commands with name, description, args schema, and handler
 - [ ] **Script loader:** Dynamic import of `.kiwi/scripts/*.ts` at startup (via `jiti` or `tsx`)
 - [ ] **Execution context:** `ctx.exec()` (interactive), `ctx.capture()` (piped), `ctx.confirm()` (prompts)
 - [ ] **Command registry:** Collects built-in + user commands, warns on name collisions
