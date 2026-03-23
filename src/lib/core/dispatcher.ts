@@ -1,4 +1,4 @@
-import { getCommand } from '@lib/commands/command.registry';
+import { getCommand, resolveAlias as resolveAliasInternal } from '@lib/commands/command.registry';
 import { Command, CommandContext } from '@lib/commands/command.types';
 import { KiwiConfig, KiwiConfigInternal } from '@lib/config/config.types';
 import { parseCommandArgs } from '@lib/core/arg-parser';
@@ -37,17 +37,18 @@ export async function dispatch(command: string | undefined, args: string[], conf
 
   handleVerbose(args);
 
-  const resolvedCommand = resolveAlias(command, config);
-  const handler = getCommand(resolvedCommand);
+  const resolvedInternalCommand = resolveAliasInternal(command);
+  const handler = getCommand(resolvedInternalCommand);
   if (handler) {
-    logger.debug('Found handler for command:', resolvedCommand);
+    logger.debug('Found handler for command:', resolvedInternalCommand);
     const ctx = resolveCommandContext(handler, args, config);
     logger.debug('Resolved command context:', ctx);
     return await handler.run(ctx);
   }
 
-  logger.debug('No handler found for command, checking for passthrough:', resolvedCommand);
-  const [targetCli, ...params] = [resolveAssociation(resolvedCommand, config), resolvedCommand, ...args].filter(Boolean) as string[];
+  const resolvedExternalCommand = resolveAlias(command, config);
+  logger.debug('No handler found for command, checking for passthrough:', resolvedExternalCommand);
+  const [targetCli, ...params] = [resolveAssociation(resolvedExternalCommand, config), resolvedExternalCommand, ...args].filter(Boolean) as string[];
   const exitCode = await passthrough(targetCli, params);
   process.exitCode = exitCode;
 }
