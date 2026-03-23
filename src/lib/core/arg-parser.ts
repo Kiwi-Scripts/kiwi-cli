@@ -220,7 +220,10 @@ function coerce(command: Command, name: string, raw: string, type: 'string' | 'n
   }
 }
 
-function parseBooleanValue(raw: string): boolean | undefined {
+function parseBooleanValue(raw: string | undefined): boolean | undefined {
+  if (raw === undefined) {
+    return undefined;
+  }
   switch (raw.toLowerCase()) {
     case 'true':
     case '1':
