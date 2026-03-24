@@ -21,22 +21,35 @@ Core dispatch loop: parse input, match against known commands, passthrough every
 
 ## Phase 2 — Script Engine
 
-User-defined commands via `.kiwi/scripts/` directory with TypeScript support.
+User-defined commands via `.kiwi/` directory with TypeScript support.
 
 - [x] **`defineCommand()` API:** Typed helper for declaring commands with name, description, args schema, and handler
-- [ ] **Script loader:** Dynamic import of `.kiwi/scripts/*.ts` at startup (via `jiti` or `tsx`)
-- [ ] **Execution context:** `ctx.exec()` (interactive), `ctx.capture()` (piped), `ctx.confirm()` (prompts)
+- [x] **Module loader:** Dynamic import of JS/TS modules and JSON files.
 - [ ] **Command registry:** Collects built-in + user commands, warns on name collisions
-- [ ] **`kiwi list`:** Show all registered commands and their source (built-in / user script)
+  - [x] Collect `commands/xxx.command.ts/js` modules from root/user dir and register commands.
+  - [ ] Implement naming collision warnings
+- [ ] **Script integration:** Reusable scripts for use in commands.
+  - [ ] Script execution infrastructure
+  - [ ] Script file imports from `scripts/xxx.script.ts/js`.
+  - [ ] Registry handling similar to *commands*
+- [ ] **Execution context:** Execution context for advanced scripting behavior.
+  - [ ] `ctx.exec()` (interactive): regular terminal behavior, essentially passthrough
+  - [ ] `ctx.capture()` (piped): capture the output/result of a process and react to it, essentially piping it into other commands/scripts
+  - [ ] `ctx.confirm()` (prompts): explicitly query the user for input
+- [ ] **`kiwi list`:** Show all registered commands and their source (built-in / user script) (essentially `kiwi help` without additional arguments)
 
 ## Phase 3 — Developer Experience
 
 Polish, error handling, and quality-of-life features.
 
 - [ ] **`kiwi init` scaffolding:** Generate `kiwi.config.ts` + `.kiwi/scripts/` directory with example script
+  - [x] Create `.kiwi` dir
+  - [x] Create command template `commands/template.command.ts`
+  - [ ] Create script template `scripts/template.script.ts`
+  - [x] Switch between local & global with `--global` flag
 - [ ] **Pretty error output:** Catch script errors, display context, suggest fixes
 - [ ] **`--dry-run` flag:** Print commands that would execute without running them
-- [x] **`--verbose` flag:** Show dispatcher decisions, config loading, script discovery
+- [x] **`--verbose` flag:** Show dispatcher decisions, config loading, script discovery (enables `debug` log-level)
 - [x] **Structured logging:** Prefixed, leveled output (`log`, `warn`, `error`) via context logger
 - [x] **Command associations:** Configure default mappings for commands and their targeted cli (`fetch` -> `git`)\
 If a command can be handled by a script, but not in all cases, it gets redirected to the correct cli as a fallback.
