@@ -13,7 +13,7 @@ export interface DispatchOptions {
  * Parse raw argv. Strips the node binary and script path.
  */
 export function parseArgv(argv: string[]) {
-  const [command, ...args] = argv.slice(2);
+  const [command, ...args] = handleVerbose(argv.slice(2));
   return {command, args};
 }
 
@@ -34,8 +34,6 @@ export async function dispatch(command: string | undefined, args: string[], conf
     command = 'help';
     logger.debug('Help flag detected. Routing to "help" command with args:', args);
   }
-
-  handleVerbose(args);
 
   const resolvedInternalCommand = resolveAliasInternal(command);
   const handler = getCommand(resolvedInternalCommand);
@@ -108,5 +106,10 @@ function resolveAlias(command: string, config: KiwiConfig) {
 function handleVerbose(args: string[]) {
   if (args.includes('--verbose')) {
     setLogLevel('debug');
+    const cleanedArgs = [...args];
+    cleanedArgs.splice(args.indexOf('--verbose'), 1);
+    logger.debug('Verbose mode enabled. Arguments after removing --verbose:', cleanedArgs);
+    return cleanedArgs;
   }
+  return args;
 }

@@ -9,7 +9,6 @@ import path from 'node:path';
 const initCommand = defineCommand({
   name: 'init',
   description: 'Initializies ".kiwi/scripts" directory with examples.',
-  alias: 'i',
   options: [
     { name: 'global', aliases: ['g'], type: 'boolean', default: false, description: 'Changes the target directory from the project root to the user home.' },
     { name: 'dry-run', aliases: ['d'], type: 'boolean', default: false, description: 'Simulates file creation without any actual changes.'}
