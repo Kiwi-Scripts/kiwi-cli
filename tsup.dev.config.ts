@@ -18,17 +18,22 @@ export default defineConfig([
     }
   },{
     entry: {
-      cli: "src/cli.ts"
+      templates: "src/lib/templates/template.registry.ts",
+      cli: "src/cli.ts",
     },
     format: ["esm"],
     dts: false,
-    sourcemap: true,
+    sourcemap: false,
     clean: false,
-    minify: false,
+    minify: true,
     target: "node18",
     platform: "node",
     splitting: false,
-    external: ['tsx'],
+    external: [
+      '@lib/templates/template.registry',
+      'tsx',
+      'clipboardy'
+    ],
     define: {
       __VERSION__: JSON.stringify(pkg.version)
     }

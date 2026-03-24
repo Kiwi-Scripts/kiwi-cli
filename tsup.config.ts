@@ -29,7 +29,11 @@ export default defineConfig([
     target: "node18",
     platform: "node",
     splitting: false,
-    external: ['tsx', '@lib/templates/template.registry'],
+    external: [
+      '@lib/templates/template.registry',
+      'tsx',
+      'clipboardy'
+    ],
     define: {
       __VERSION__: JSON.stringify(pkg.version)
     }
