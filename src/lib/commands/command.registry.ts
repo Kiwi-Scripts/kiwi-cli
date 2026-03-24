@@ -1,6 +1,7 @@
 import healthCommand from '@commands/health.cmd';
 import helpCommand from '@commands/help.cmd';
 import initCommand from '@commands/init.cmd';
+import uuidCommand from '@commands/uuid.command';
 import versionCommand from '@commands/version.cmd';
 import { Command } from '@lib/commands/command.types';
 import logger from '@lib/util/logger';
@@ -9,12 +10,13 @@ const commands = new Map<string, Command>();
 const commandAliases = new Map<string, string>();
 
 /** A union of all known (i.e. built-in) commands. */
-export type KnownCommands = 'help' | 'version' | 'health' | 'init';
+export type KnownCommands = 'help' | 'version' | 'health' | 'init' | 'uuid';
 export const ownCommands = [
   helpCommand,
   versionCommand,
   healthCommand,
-  initCommand
+  initCommand,
+  uuidCommand,
 ] as const;
 ownCommands.forEach(registerCommand);
 
