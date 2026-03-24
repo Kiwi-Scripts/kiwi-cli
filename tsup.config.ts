@@ -18,7 +18,8 @@ export default defineConfig([
     }
   },{
     entry: {
-      cli: "src/cli.ts"
+      templates: "src/lib/templates/template.registry.ts",
+      cli: "src/cli.ts",
     },
     format: ["esm"],
     dts: false,
@@ -28,7 +29,7 @@ export default defineConfig([
     target: "node18",
     platform: "node",
     splitting: false,
-    external: ['tsx'],
+    external: ['tsx', '@lib/templates/template.registry'],
     define: {
       __VERSION__: JSON.stringify(pkg.version)
     }
