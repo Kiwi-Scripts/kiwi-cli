@@ -5,10 +5,6 @@ import { parseCommandArgs } from '@lib/core/arg-parser';
 import { passthrough } from '@lib/core/passthrough';
 import logger, { setLogLevel } from '@lib/util/logger';
 
-export interface DispatchOptions {
-  // Options for dispatch execution
-}
-
 /**
  * Parse raw argv. Strips the node binary and script path.
  */
