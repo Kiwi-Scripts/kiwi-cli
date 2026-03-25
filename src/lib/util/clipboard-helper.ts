@@ -1,13 +1,10 @@
 import logger from '@lib/util/logger';
+import { tryLoadOptionalDep } from '@lib/util/optional-deps';
 
 export async function copyToClipboard(text: string) {
-  try {
-    return await import('clipboardy').then(mod => {
-      mod.default.writeSync(text);
-      logger.debug(`Wrote '${text}' to clipboard.`);
-      return true;
-    });
-  } catch (error) {
-    logger.warn(`Could not copy to clipboard. Make sure 'clipboardy' is installed.`);
-  }
+  const clipboardy = await tryLoadOptionalDep('clipboardy');
+  if (!clipboardy) return false;
+  clipboardy.default.writeSync(text);
+  logger.debug(`Wrote '${text}' to clipboard.`);
+  return true;
 }

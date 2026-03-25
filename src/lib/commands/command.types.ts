@@ -1,4 +1,5 @@
 import { KiwiConfigInternal } from '@lib/config/config.types';
+import { Prettify } from '@lib/util/types';
 
 // === Type Mapping =============================================
 
@@ -30,8 +31,6 @@ export interface OptionDef {
 }
 
 // === Inference Engine =========================================
-
-type Prettify<T> = { [K in keyof T]: T[K] } & {};
 
 /**
  * A value is guaranteed (non-optional) if `required: true`

@@ -1,7 +1,7 @@
 import { ModuleLoadingError } from '@lib/errors/module.error';
 import { ensureFile } from '@lib/util/fs-utils';
 import logger from '@lib/util/logger';
-import chalk from 'chalk';
+import { loadOptionalDep } from '@lib/util/optional-deps';
 import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
@@ -48,13 +48,7 @@ export async function loadModule(filePath: string, options: LoadModuleOptions = 
     try {
       return assertDefaultExport(await loadTypeScriptModule(filePath, options.silent), filePath, options);
     } catch (error) {
-      // TODO: improve error handling and messages for tsx loading failures
-      if (options.silent) return terminateSilent(`Failed to load TypeScript module: '${filePath}'. Error: ${(error as Error).message}`);
-      logger.ml.warn( 'Tried to load a typescript module and failed.',
-        'Loading .ts files requires the optional dependency "tsx".',
-        `Install it with: ${chalk.reset('npm install tsx')}`,
-        'Or use a JS/JSON file instead.');
-      logger.error(error);
+      return terminate(`Failed to load TypeScript module: '${filePath}'. Error: ${(error as Error).message}`, options.silent);
     }
   }
 
@@ -88,7 +82,7 @@ export async function loadTypeScriptModule(filePath: TS_FILE, silent = false) {
 }
 
 async function importWithTsx(filePath: string) {
-  const { tsImport } = await import('tsx/esm/api');
+  const { tsImport } = await loadOptionalDep('tsx');
   const mod = await tsImport(url.pathToFileURL(filePath).href, {
     parentURL: import.meta.url
   });
