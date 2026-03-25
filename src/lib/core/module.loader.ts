@@ -1,3 +1,4 @@
+import { ensureFile } from '@lib/util/fs-utils';
 import logger from '@lib/util/logger';
 import chalk from 'chalk';
 import fs from 'node:fs';
@@ -61,7 +62,7 @@ export async function loadModule(filePath: string, options: LoadModuleOptions = 
 // === json loading =================================================
 
 export function loadJsonModule(filePath: JSON_FILE) {
-  const abs = assertFileExists(filePath);
+  const abs = ensureFile(filePath);
   logger.debug('Loading JSON file:', abs);
   const raw = fs.readFileSync(abs, 'utf8');
   return JSON.parse(raw);
@@ -70,7 +71,7 @@ export function loadJsonModule(filePath: JSON_FILE) {
 // === javascript loading ===========================================
 
 export async function loadJavaScriptModule(filePath: JS_FILE, silent = false) {
-  const abs = assertFileExists(filePath);
+  const abs = ensureFile(filePath);
   logger.debug('Loading JavaScript file:', abs);
   const mod = await import(url.pathToFileURL(abs).href);
   return (mod.default ?? mod);
@@ -79,7 +80,7 @@ export async function loadJavaScriptModule(filePath: JS_FILE, silent = false) {
 // === typescript specific loading using tsx  =======================
 
 export async function loadTypeScriptModule(filePath: TS_FILE, silent = false) {
-  const abs = assertFileExists(filePath);
+  const abs = ensureFile(filePath);
   logger.debug('Loading TypeScript file:', abs);
   return await importWithTsx(abs);
 }
@@ -104,15 +105,6 @@ export function isJavaScriptFile(filePath: string): filePath is JS_FILE {
 
 export function isJsonFile(filePath: string): filePath is JSON_FILE {
   return JSON_EXTENSIONS.includes(path.extname(filePath));
-}
-
-/** Asserts the the filepath exists. Returns the resolved path, or throws if its not found. */
-function assertFileExists(filePath: string) {
-  const abs = path.resolve(filePath);
-  if (!fs.existsSync(abs)) {
-    throw new Error(`File not found: '${abs}'`);
-  }
-  return abs;
 }
 
 function isAllowedExtension(ext: ModuleType, allowedExtensions: ModuleType[] | undefined, silent = false) {

@@ -1,10 +1,9 @@
 import DEFAULT_CONFIG from '@lib/config/config.default';
 import { KiwiConfig, KiwiConfigInternal } from '@lib/config/config.types';
 import { loadModule, MODULE_EXTENSIONS } from '@lib/core/module.loader';
+import { findFileByName } from '@lib/util/fs-utils';
 import logger from '@lib/util/logger';
 import { kiwiPathsGlobal } from '@lib/util/paths';
-import fs from 'node:fs';
-import path from 'node:path';
 
 const CONFIG_FILENAME = 'kiwi.config'
 
@@ -42,14 +41,10 @@ export async function loadConfig() {
 
 function doFindConfigFile(dir: string) {
   logger.debug('Checking for config file at:', dir);
-  for (const ext of Object.values(MODULE_EXTENSIONS).flat()) {
-    const candidate = path.join(dir, CONFIG_FILENAME + ext);
-    if (fs.existsSync(candidate)) {
-      logger.debug('Found config file:', candidate);
-      // max one config per dir, earliest match wins
-      return candidate;
-    }
-  }
+  const extensions = Object.values(MODULE_EXTENSIONS).flat();
+  const result = findFileByName(dir, CONFIG_FILENAME, extensions);
+  result ? logger.debug(`Found config file: ${result}`) : logger.debug('No config file found.');
+  return result;
 }
 
 async function loadConfigFile(filePath: string) {

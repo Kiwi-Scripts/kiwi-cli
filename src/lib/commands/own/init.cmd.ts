@@ -1,5 +1,6 @@
 import { defineCommand } from '@lib/commands/command.types';
 import { loadTemplates } from '@lib/templates/template.loader';
+import { ensureDir } from '@lib/util/fs-utils';
 import logger from '@lib/util/logger';
 import { kiwiPaths, kiwiPathsGlobal } from '@lib/util/paths';
 import chalk from 'chalk';
@@ -17,7 +18,7 @@ const initCommand = defineCommand({
     const targetDir = ctx.options.global ? kiwiPathsGlobal.userHome : kiwiPaths.projectRoot;
     const dry = ctx.options['dry-run'];
     const resultDir = path.join(targetDir, '.kiwi', 'commands');
-    if (!dry) fs.mkdirSync(resultDir, {recursive: true});
+    if (!dry) ensureDir(resultDir);
     logger.log(`${chalk.green('[CREATE]')} dir: '${resultDir}'`);
 
     const tsTemplateFile = path.join(resultDir, 'template.command.ts');
