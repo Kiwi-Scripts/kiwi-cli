@@ -2,6 +2,7 @@
 import { getAllCommands, getCommand, isKnownCommand } from '@lib/commands/command.registry';
 import { Command, defineCommand, OptionDef, PositionalArgDef } from '@lib/commands/command.types';
 import logger from '@lib/util/logger';
+import { displayLength } from '@lib/util/string-utils';
 import chalk from 'chalk';
 
 const MAX_COL_WIDTH = Math.min(process.stdout.columns ?? Infinity, 120);
@@ -198,7 +199,7 @@ function formatDesc(colWidths: ColumnWidths, desc: string = '', defaultValue: st
   if (!desc) return formatDefault(defaultValue).padStart(descWidth);
   const wrapped = wrapText(desc, descWidth);
   const defaultStr = formatDefault(defaultValue);
-  const defaultStrLength = defaultStr.length - 16; // exclude chalk dim formatting from length calculation
+  const defaultStrLength = displayLength(defaultStr);
   const columnOffsetWidth = colWidths.label;
   const indent = '-'.repeat(columnOffsetWidth);
   const lastLine = wrapped.pop()!;
