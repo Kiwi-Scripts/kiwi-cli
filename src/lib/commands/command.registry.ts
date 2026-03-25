@@ -1,7 +1,7 @@
 import healthCommand from '@commands/health.cmd';
 import helpCommand from '@commands/help.cmd';
 import initCommand from '@commands/init.cmd';
-import uuidCommand from '@commands/uuid.command';
+import uuidCommand from '@commands/uuid.cmd';
 import versionCommand from '@commands/version.cmd';
 import { Command } from '@lib/commands/command.types';
 import { getConfig } from '@lib/config/config.loader';
