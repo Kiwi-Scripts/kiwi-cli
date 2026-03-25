@@ -3,13 +3,14 @@ import { Command, CommandContext } from '@lib/commands/command.types';
 import { KiwiConfig, KiwiConfigInternal } from '@lib/config/config.types';
 import { parseCommandArgs } from '@lib/core/arg-parser';
 import { passthrough } from '@lib/core/passthrough';
-import logger, { setLogLevel } from '@lib/util/logger';
+import { extractGlobalFlags } from '@lib/util/global-flags';
+import logger from '@lib/util/logger';
 
 /**
  * Parse raw argv. Strips the node binary and script path.
  */
 export function parseArgv(argv: string[]) {
-  const [command, ...args] = handleVerbose(argv.slice(2));
+  const [command, ...args] = extractGlobalFlags(argv.slice(2));
   return {command, args};
 }
 
@@ -97,15 +98,4 @@ function resolveConfigAlias(command: string, config: KiwiConfig) {
     return resolved;
   }
   return command;
-}
-
-function handleVerbose(args: string[]) {
-  if (args.includes('--verbose')) {
-    setLogLevel('debug');
-    const cleanedArgs = [...args];
-    cleanedArgs.splice(args.indexOf('--verbose'), 1);
-    logger.debug('Verbose mode enabled. Arguments after removing --verbose:', cleanedArgs);
-    return cleanedArgs;
-  }
-  return args;
 }
