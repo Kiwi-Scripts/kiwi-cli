@@ -45,9 +45,9 @@ function printAllCommands() {
 
   const commands = getAllCommands();
   const nameColumnWidth = commands.reduce((longest, command) => Math.max(longest, command.name.length), 0) + 2;
-  logger.indent().log(`${'Command:'.padEnd(nameColumnWidth)} - Description:`);
+  logger.indent.log(`${'Command:'.padEnd(nameColumnWidth)} - Description:`);
   for (const command of commands) {
-    logger.indent().log(`${command.name.padEnd(nameColumnWidth)} - ${command.description}`);
+    logger.indent.log(`${command.name.padEnd(nameColumnWidth)} - ${command.description}`);
   }
 }
 
@@ -126,10 +126,10 @@ function printAttributeDetail(command: Command, name: string): void {
     logger.log();
     logger.log('Available attributes:');
     for (const a of command.positionalArgs ?? []) {
-      logger.indent().log(a.name);
+      logger.indent.log(a.name);
     }
     for (const o of command.options ?? []) {
-      logger.indent().log(`--${o.name}`);
+      logger.indent.log(`--${o.name}`);
     }
     logger.np.log();
     return;
@@ -163,7 +163,7 @@ function printArgEntry(arg: PositionalArgDef, colWidths: ColumnWidths): void {
   const label = [names, type, req].join(' ').trimEnd();
   const desc = formatDesc(colWidths, arg.description, arg.default);
 
-  logger.ml.indent().log(`${label}  ${desc}`);
+  logger.ml.indent.log(`${label}  ${desc}`);
 }
 
 function printOptionEntry(opt: OptionDef, colWidths: ColumnWidths): void {
@@ -173,7 +173,7 @@ function printOptionEntry(opt: OptionDef, colWidths: ColumnWidths): void {
   const label = [names, type, req].join(' ').trimEnd();
   const desc = formatDesc(colWidths, opt.description, opt.default);
 
-  logger.ml.indent().log(`${label}  ${desc}`);
+  logger.ml.indent.log(`${label}  ${desc}`);
 }
 
 function formatOptionNames(option: OptionDef): string {

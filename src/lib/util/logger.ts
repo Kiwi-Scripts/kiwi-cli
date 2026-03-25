@@ -1,3 +1,4 @@
+import { callableAccessor } from '@lib/util/property-utils';
 import chalk, { ChalkInstance } from 'chalk';
 import { inspect } from 'node:util';
 
@@ -10,6 +11,7 @@ const logLevelPriority = {
 } as const;
 
 interface Logger {
+  readonly prefix: string;
   debug(...data: any[]): void;
   log(...data: any[]): void;
   warn(...data: any[]): void;
@@ -20,8 +22,9 @@ interface Logger {
   // modifiers
   readonly ml: StringLogger;
   readonly np: Logger;
-  readonly indent: (amount?: number) => Logger;
-  readonly prefix: string;
+  readonly indent: {
+    (amount?: number): Logger;
+  } & Logger;
 }
 
 interface StringLogger extends Logger {
@@ -76,13 +79,39 @@ const defaultConfig: LoggerConfig = {
   showTimestamp: false
 }
 
-class LoggerImpl implements Logger {
+interface LoggerModifiers {
+  indent?: number;
+  ml?: boolean;
+  np?: boolean;
+}
+
+class LoggerInstance implements Logger {
+  constructor(
+    private readonly owner: LoggerImpl,
+    private readonly modifiers: LoggerModifiers = {}
+  ) {}
+
+  // Chaining — returns new LogEntry with merged modifiers (immutable)
+  get ml()  { return new LoggerInstance(this.owner, { ...this.modifiers, ml: true }); }
+  get np()  { return new LoggerInstance(this.owner, { ...this.modifiers, np: true }); }
+  get indent() { return callableAccessor((amount: number = 2) => new LoggerInstance(this.owner, { ...this.modifiers, indent: (this.modifiers.indent ?? 0) + amount })); }
+
+  // Terminal methods — fire and forget, no state to reset
+  debug(...data: any[]) { this.owner.debug(data, this.modifiers); }
+  log(...data: any[])   { this.owner.writeWithModifiers('log', data, this.modifiers); }
+  warn(...data: any[])  { this.owner.writeWithModifiers('warn', data, this.modifiers); }
+  error(...data: any[]) { this.owner.writeWithModifiers('error', data, this.modifiers); }
+
+  // Forward read-only members
+  shouldLog(level: LogLevel) { return this.owner.shouldLog(level); }
+  get prefix() { return this.owner.prefix; }
+
+  setLogLevel(level: LogLevel) { this.owner.setLogLevel(level); }
+  setConfigValue<K extends keyof LoggerConfig>(key: K, value: LoggerConfig[K]) { this.owner.setConfigValue(key, value); }
+}
+
+class LoggerImpl {
   private config: LoggerConfig;
-  private modifiers: {
-    indent?: number;
-    ml?: boolean;
-    np?: boolean;
-  } = {};
 
   get prefix() {
     return this.config.prefix;
@@ -93,40 +122,12 @@ class LoggerImpl implements Logger {
 
   }
 
-  debug(...data: any[]) {
+  debug(data: any[], modifiers: LoggerModifiers = {}) {
     if (!this.shouldLog('debug')) return; // avoid unnecessary processing for debug messages
-    this.handle('debug', [data
+    this.writeWithModifiers('debug', [data
       .map(d => typeof d === 'string' ? d : inspect(d, { depth: null }))
       .join(' ')]
-    );
-  }
-
-  log(...data: any[]) {
-    this.handle('log', data);
-  }
-
-  warn(...data: any[]) {
-    this.handle('warn', data);
-  }
-
-  error(...data: any[]) {
-    this.handle('error', data);
-  }
-
-  // Modifiers
-  get ml() {
-    this.modifiers.ml = true;
-    return this;
-  }
-
-  get np() {
-    this.modifiers.np = true;
-    return this;
-  }
-
-  indent(amount: number = 2): Logger {
-    this.modifiers.indent = (this.modifiers.indent || 0) + amount;
-    return this;
+    , modifiers);
   }
 
   setLogLevel(level: LogLevel) {
@@ -148,18 +149,17 @@ class LoggerImpl implements Logger {
     return logLevelPriority[level] >= logLevelPriority[this.config.level];
   }
 
-  private handle(level: LogLevel, data: any[]) {
+  public writeWithModifiers(level: LogLevel, data: any[], modifiers: LoggerModifiers) {
     if (!this.shouldLog(level)) return;
-    const [msg, args] = this.formatMessage(level, data);
+    const [msg, args] = this.formatMessage(level, data, modifiers);
     this.config.channel.write(level, msg, args);
-    this.resetModifiers();
   }
 
-  private formatMessage(level: LogLevel, data: any[]): [string, any[]] {
+  private formatMessage(level: LogLevel, data: any[], modifiers: LoggerModifiers): [string, any[]] {
     const timestamp = this.getTimestamp();
-    const prefix = this.getPrefix(level);
-    const indent = this.modifiers.indent ? ' '.repeat(this.modifiers.indent) : '';
-    if (!this.modifiers.ml) {
+    const prefix = this.getPrefix(level, modifiers);
+    const indent = modifiers.indent ? ' '.repeat(modifiers.indent) : '';
+    if (!modifiers.ml) {
       const msg = typeof data[0] === 'string' ? data[0] : '';
       const assembledMsg = `${timestamp}${prefix}${indent}${msg}`.trim();
       return [this.colorizeMsg(level, assembledMsg), data.slice(1)];
@@ -180,33 +180,29 @@ class LoggerImpl implements Logger {
     return this.config.colorize ? chalk.gray(timestamp) : timestamp;
   }
 
-  private getPrefix(level: LogLevel) {
-    if (this.modifiers.np) return '';
+  private getPrefix(level: LogLevel, modifiers: LoggerModifiers) {
+    if (modifiers.np) return '';
     return `${this.config.colorize ? this.config.prefixColors[level](this.config.prefix) : this.config.prefix} `;
-  }
-
-  private resetModifiers() {
-    this.modifiers = {};
   }
 }
 
-const logger: Logger = new LoggerImpl();
+const logger: Logger = new LoggerInstance(new LoggerImpl());
 
 function getLog(config: Partial<LoggerConfig> = {}): Logger {
-  return new LoggerImpl(config);
+  return new LoggerInstance(new LoggerImpl(config));
 }
 
 function setLogLevel(level: LogLevel, loggerInstance: Logger = logger) {
-  if (loggerInstance instanceof LoggerImpl) {
-    loggerInstance.setLogLevel(level);
+  if (loggerInstance instanceof LoggerInstance) {
+    (loggerInstance as LoggerInstance).setLogLevel(level);
     return;
   }
   throw new Error('Cannot set log level on provided logger instance');
 }
 
 function setConfigValue<K extends keyof LoggerConfig>(key: K, value: LoggerConfig[K], loggerInstance: Logger = logger) {
-  if (loggerInstance instanceof LoggerImpl) {
-    loggerInstance.setConfigValue(key, value);
+  if (loggerInstance instanceof LoggerInstance) {
+    (loggerInstance as LoggerInstance).setConfigValue(key, value);
     return;
   }
   throw new Error('Cannot set config value on provided logger instance');
