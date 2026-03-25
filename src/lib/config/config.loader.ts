@@ -1,11 +1,10 @@
 import DEFAULT_CONFIG from '@lib/config/config.default';
 import { KiwiConfig, KiwiConfigInternal } from '@lib/config/config.types';
 import logger from '@lib/util/logger';
-import { loadTypeScriptModule } from '@lib/util/module.loader';
+import { loadModule } from '@lib/util/module.loader';
 import { kiwiPathsGlobal } from '@lib/util/paths';
 import fs from 'node:fs';
 import path from 'node:path';
-import url from 'node:url';
 
 const CONFIG_FILENAME_EXTENSIONS = [
   // typescript
@@ -62,37 +61,13 @@ function doFindConfigFile(dir: string) {
 }
 
 async function loadConfigFile(filePath: string) {
-  const abs = kiwiPathsGlobal.resolve(filePath);
-  const ext = path.extname(abs);
-
-  if (ext === '.json') {
-    logger.debug('Loading JSON config file:', abs);
-    const raw = fs.readFileSync(abs, 'utf8');
-    return JSON.parse(raw) as KiwiConfig;
+  logger.debug('Loading config module from:', filePath);
+  try {
+    return loadModule(filePath, { extType: ['ts', 'js', 'json'], requireDefaultExport: true });
+  } catch (error) {
+    logger.warn(`Failed to load config file: ${filePath}. Error: ${(error as Error).message}`);
+    return {};
   }
-
-  if (CONFIG_FILENAME_EXTENSIONS[1].includes(ext)) {
-    logger.debug('Loading JavaScript config file:', abs);
-    const mod = await import(url.pathToFileURL(abs).href);
-    return (mod.default ?? mod) as KiwiConfig;
-  }
-
-  if(CONFIG_FILENAME_EXTENSIONS[0].includes(ext)) {
-    logger.debug('Loading TypeScript config file:', abs);
-    try {
-      const mod = await loadTypeScriptModule(abs);
-      return (mod.default ?? mod) as KiwiConfig;
-    } catch (error) {
-      logger.warn(`TypeScript config detected: ${filePath}`);
-      logger.ml.indent().warn(
-        'Loading .ts config files requires the optional dependency "tsx".',
-        'Install it with: npm install tsx',
-        'Or use kiwi.config.js / kiwi.config.json instead.');
-      logger.error(error);
-    }
-  }
-
-  throw new Error(`Unsupported config format: ${filePath}, ${ext}`);
 }
 
 function mergeConfigs(base: KiwiConfig, override: KiwiConfig) {
