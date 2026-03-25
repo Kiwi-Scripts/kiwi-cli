@@ -2,7 +2,7 @@
 import { getAllCommands, getCommand, isKnownCommand } from '@lib/commands/command.registry';
 import { Command, defineCommand, OptionDef, PositionalArgDef } from '@lib/commands/command.types';
 import logger from '@lib/util/logger';
-import { displayLength } from '@lib/util/string-utils';
+import { displayLength, wrapText } from '@lib/util/string-utils';
 import chalk from 'chalk';
 
 const MAX_COL_WIDTH = Math.min(process.stdout.columns ?? Infinity, 120);
@@ -214,25 +214,6 @@ function formatDefault(value: string | number | boolean | undefined): string {
   const prefix = 'Default: ';
   const display = typeof value === 'string' ? `"${value}"` : String(value);
   return chalk.dim(` [${prefix}${display}]`);
-}
-
-function wrapText(text: string, maxWidth: number): string[] {
-  if (text.length <= maxWidth) return [text];
-  const words = text.split(' ');
-  const lines: string[] = [];
-  let currentLine = '';
-  for (const word of words) {
-    if ((currentLine + ' ' + word).trim().length > maxWidth) {
-      lines.push(currentLine.trim());
-      currentLine = word;
-    } else {
-      currentLine += ' ' + word;
-    }
-  }
-  if (currentLine) {
-    lines.push(currentLine.trim());
-  }
-  return lines;
 }
 
 interface ColumnWidths {
