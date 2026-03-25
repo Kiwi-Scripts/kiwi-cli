@@ -1,7 +1,8 @@
+import { defineCommand } from '@lib/commands/command.types';
 import logger from '@lib/util/logger';
 import version from '@lib/version';
 
-const versionCommand = {
+const versionCommand = defineCommand({
   name: 'version',
   description: 'Prints the current kiwi-cli version.',
   run() {
@@ -14,5 +15,5 @@ const versionCommand = {
     );
     logger.np.log();
   },
-} as const;
+})
 export default versionCommand;
