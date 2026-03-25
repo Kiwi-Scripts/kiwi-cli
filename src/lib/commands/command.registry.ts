@@ -33,7 +33,7 @@ export function registerCommand(command: Command) {
 function registerAlias(command: Command) {
   if (!command.alias) return;
   if (commandAliases.has(command.alias)) {
-    throw new Error(`Alias '${command.alias}' was already registered! (exisitng: '${commandAliases.get(command.alias)}', new: '${command.name}')`);
+    throw new Error(`Alias '${command.alias}' was already registered! (existing: '${commandAliases.get(command.alias)}', new: '${command.name}')`);
   }
   commandAliases.set(command.alias, command.name);
 }

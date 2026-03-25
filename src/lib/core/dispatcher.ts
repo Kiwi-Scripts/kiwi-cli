@@ -44,7 +44,7 @@ export async function dispatch(command: string | undefined, args: string[], conf
     return await handler.run(ctx);
   }
 
-  const resolvedExternalCommand = resolveAlias(command, config);
+  const resolvedExternalCommand = resolveConfigAlias(command, config);
   logger.debug('No handler found for command, checking for passthrough:', resolvedExternalCommand);
   const [targetCli, ...params] = [resolveAssociation(resolvedExternalCommand, config), resolvedExternalCommand, ...args].filter(Boolean) as string[];
   const exitCode = await passthrough(targetCli, params);
@@ -94,7 +94,7 @@ function resolveAssociation(command: string | undefined, config: KiwiConfig) {
  * @param config The Kiwi configuration object containing aliases.
  * @returns The resolved command if an alias is found, otherwise the original command.
  */
-function resolveAlias(command: string, config: KiwiConfig) {
+function resolveConfigAlias(command: string, config: KiwiConfig) {
   const resolved = config.aliases?.[command];
   if (resolved) {
     logger.debug(`Resolved alias '${command}' to '${resolved}'`);
