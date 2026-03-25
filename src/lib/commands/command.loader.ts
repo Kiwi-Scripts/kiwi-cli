@@ -1,7 +1,7 @@
 import { registerCommand } from '@lib/commands/command.registry';
 import { Command } from '@lib/commands/command.types';
+import { loadModule } from '@lib/core/module.loader';
 import logger from '@lib/util/logger';
-import { loadModule } from '@lib/util/module.loader';
 import { kiwiPathsGlobal } from '@lib/util/paths';
 import fs from 'node:fs';
 import path from 'node:path';

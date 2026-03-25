@@ -1,19 +1,11 @@
 import DEFAULT_CONFIG from '@lib/config/config.default';
 import { KiwiConfig, KiwiConfigInternal } from '@lib/config/config.types';
+import { loadModule, MODULE_EXTENSIONS } from '@lib/core/module.loader';
 import logger from '@lib/util/logger';
-import { loadModule } from '@lib/util/module.loader';
 import { kiwiPathsGlobal } from '@lib/util/paths';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const CONFIG_FILENAME_EXTENSIONS = [
-  // typescript
-  ['.ts', '.mts', '.cts'],
-  // raw javascript
-  ['.js', '.mjs', '.cjs'],
-  // plain JSON
-  ['.json']
-];
 const CONFIG_FILENAME = 'kiwi.config'
 
 let GLOBAL_CONFIG: KiwiConfigInternal | null = null;
@@ -50,11 +42,11 @@ export async function loadConfig() {
 
 function doFindConfigFile(dir: string) {
   logger.debug('Checking for config file at:', dir);
-  for (const ext of CONFIG_FILENAME_EXTENSIONS.flat()) {
+  for (const ext of Object.values(MODULE_EXTENSIONS).flat()) {
     const candidate = path.join(dir, CONFIG_FILENAME + ext);
     if (fs.existsSync(candidate)) {
       logger.debug('Found config file:', candidate);
-      // max one config per dir
+      // max one config per dir, earliest match wins
       return candidate;
     }
   }
@@ -63,7 +55,7 @@ function doFindConfigFile(dir: string) {
 async function loadConfigFile(filePath: string) {
   logger.debug('Loading config module from:', filePath);
   try {
-    return loadModule(filePath, { extType: ['ts', 'js', 'json'], requireDefaultExport: true });
+    return loadModule(filePath, { requireDefaultExport: true });
   } catch (error) {
     logger.warn(`Failed to load config file: ${filePath}. Error: ${(error as Error).message}`);
     return {};
