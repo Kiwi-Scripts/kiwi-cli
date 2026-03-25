@@ -81,7 +81,7 @@ function mergeAssociations(base: KiwiConfig['associations'], override: KiwiConfi
   if (override) {
     Object.keys(override).forEach(key => {
       const existing = merged[key] ?? [];
-      merged[key] = [...existing, ...override[key]];
+      merged[key] = [...new Set([...existing, ...override[key]])];
     });
   }
   return merged;
