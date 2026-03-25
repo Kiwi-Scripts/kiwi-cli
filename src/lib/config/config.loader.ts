@@ -17,6 +17,15 @@ const CONFIG_FILENAME_EXTENSIONS = [
 ];
 const CONFIG_FILENAME = 'kiwi.config'
 
+let GLOBAL_CONFIG: KiwiConfigInternal | null = null;
+
+export function getConfig() {
+  if (!GLOBAL_CONFIG) {
+    throw new Error('Config has not been loaded yet.');
+  }
+  return GLOBAL_CONFIG;
+}
+
 export async function loadConfig() {
   const projectConfigFile = doFindConfigFile(kiwiPathsGlobal.projectRoot);
   const userConfigFile = doFindConfigFile(kiwiPathsGlobal.userHome);
@@ -36,7 +45,8 @@ export async function loadConfig() {
   (finalConfig as KiwiConfigInternal).usedConfigFiles = usedConfigFiles;
 
   logger.debug('Final merged config:', finalConfig);
-  return finalConfig as KiwiConfigInternal;
+  GLOBAL_CONFIG = finalConfig as KiwiConfigInternal;
+  return GLOBAL_CONFIG;
 }
 
 function doFindConfigFile(dir: string) {

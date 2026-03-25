@@ -1,4 +1,3 @@
-import { KiwiConfig } from '@lib/config/config.types';
 import logger from '@lib/util/logger';
 import chalk from 'chalk';
 import fs from 'node:fs';
@@ -78,7 +77,7 @@ export async function loadJavaScriptModule(filePath: string, silent = false) {
   const abs = assertFileExists(filePath);
   logger.debug('Loading JavaScript file:', abs);
   const mod = await import(url.pathToFileURL(abs).href);
-  return (mod.default ?? mod) as KiwiConfig;
+  return (mod.default ?? mod);
 }
 
 // === typescript specific loading using tsx  =======================
@@ -127,8 +126,8 @@ function isAllowedTypeSuffix(filePath: string, typeSuffix: string | undefined, s
   return terminate(`File '${path.basename(filePath)}' does not match the required type suffix '${typeSuffix}'.`, silent);
 }
 
-function assertDefaultExport(mod: any, filePath: string, {required, silent}: {required?: boolean, silent?: boolean}) {
-  if (!mod || (required && !mod.default)) {
+function assertDefaultExport(mod: any, filePath: string, {requireDefaultExport, silent}: Pick<LoadModuleOptions, 'requireDefaultExport' | 'silent'>) {
+  if (!mod || (requireDefaultExport && !mod.default)) {
     return terminate(`Module '${path.basename(filePath)}' does not have a default export.`, silent);
   }
   logger.debug(`Module '${path.basename(filePath)}' has a default export.`);

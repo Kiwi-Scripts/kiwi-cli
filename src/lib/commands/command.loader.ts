@@ -25,20 +25,26 @@ export async function loadCommands() {
 }
 
 async function loadCommandModules() {
+  // TODO: Consider supporting nested directories for better organization (e.g. `commands/build.ts`, `commands/deploy.ts`, etc.)
+  // FIXME: Deep nesting and whacky error handling
   const commandModules: LoadedCommandModule[] = [];
   for (const dir of [GLOBAL_COMMAND_DIR, LOCAL_COMMAND_DIR]) {
     try {
       const files = fs.readdirSync(dir);
       for (const file of files) {
         const abs = path.join(dir, file);
-        const mod = await loadModule(abs, { typeSuffix: 'command', extType: ['ts', 'js'], silent: true, requireDefaultExport: true });
-        if (mod) {
-          logger.debug(`Loaded command module from file: ${abs}`);
-          commandModules.push({ filePath: abs, basename: file, command: mod.default })
-        };
+        try {
+          const mod = await loadModule(abs, { typeSuffix: 'command', extType: ['ts', 'js'], silent: true, requireDefaultExport: true });
+          if (mod) {
+            logger.debug(`Loaded command module from file: ${abs}`);
+            commandModules.push({ filePath: abs, basename: file, command: mod.default })
+          };
+        } catch (error) {
+          logger.warn(`Failed to load command module from file: ${abs}. Error: ${(error as Error).message}`);
+        }
       }
     } catch (error) {
-      // Handle error if needed
+      logger.debug(`No command directory found at: ${dir}`);
     }
   }
   return commandModules;

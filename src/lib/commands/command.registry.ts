@@ -4,6 +4,8 @@ import initCommand from '@commands/init.cmd';
 import uuidCommand from '@commands/uuid.command';
 import versionCommand from '@commands/version.cmd';
 import { Command } from '@lib/commands/command.types';
+import { getConfig } from '@lib/config/config.loader';
+import { KiwiConfigInternal } from '@lib/config/config.types';
 import logger from '@lib/util/logger';
 
 const commands = new Map<string, Command>();
@@ -54,7 +56,7 @@ export function isKnownCommand(name: string): name is KnownCommands {
   return commands.has(name);
 }
 
-export async function runHelpCommand(command: string, args: string[], config: any) {
+export async function runHelpCommand(command: string, args: string[], config?: KiwiConfigInternal) {
   const help = getCommand('help');
-  await help.run({ command, rawArgs: args, config, positionalArgs: {}, options: {} });
+  await help.run({ command, rawArgs: args, config: config ?? getConfig(), positionalArgs: {}, options: {} });
 }
