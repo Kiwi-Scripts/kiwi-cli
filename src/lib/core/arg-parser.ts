@@ -1,16 +1,5 @@
 import { Command, CommandContext, OptionDef } from '@lib/commands/command.types';
-import logger from '@lib/util/logger';
-
-// Custom error type for argument parsing errors
-export class ArgParseError extends Error {
-  constructor(
-    message: string,
-    public readonly command: Command,
-  ) {
-    super(message);
-    this.name = 'ArgParseError';
-  }
-}
+import { ArgParseError } from '@lib/errors/arg-parser.error';
 
 interface ParsedOptionToken {
   name: string;
@@ -73,19 +62,6 @@ class ArgParser {
   }
 
   parse() {
-    try {
-      return this.doParse();
-    } catch (error) {
-      if (error instanceof ArgParseError) {
-        logger.error(`Error parsing arguments for command '${this.command.name}': ${error.message}`);
-        logger.log(`Run 'kiwi help ${this.command.name}' for usage information.`);
-        process.exit(1);
-      }
-      throw error; // re-throw unexpected errors
-    }
-  }
-
-  private doParse() {
     this.extractOptionsAndPositionals();
     this.parsePositionalArgs();
     this.validateRequiredOptions();

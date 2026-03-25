@@ -1,3 +1,4 @@
+import { ModuleLoadingError } from '@lib/errors/module.error';
 import { ensureFile } from '@lib/util/fs-utils';
 import logger from '@lib/util/logger';
 import chalk from 'chalk';
@@ -47,6 +48,7 @@ export async function loadModule(filePath: string, options: LoadModuleOptions = 
     try {
       return assertDefaultExport(await loadTypeScriptModule(filePath, options.silent), filePath, options);
     } catch (error) {
+      // TODO: improve error handling and messages for tsx loading failures
       if (options.silent) return terminateSilent(`Failed to load TypeScript module: '${filePath}'. Error: ${(error as Error).message}`);
       logger.ml.warn( 'Tried to load a typescript module and failed.',
         'Loading .ts files requires the optional dependency "tsx".',
@@ -131,7 +133,7 @@ function assertDefaultExport(mod: any, filePath: string, {requireDefaultExport, 
 
 function terminate(message: string, silent = false) {
   if (silent) return terminateSilent(message);
-  throw new Error(message);
+  throw new ModuleLoadingError(message);
 }
 
 function terminateSilent(message: string) {

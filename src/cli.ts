@@ -3,6 +3,7 @@
 import { loadCommands } from '@lib/commands/command.loader';
 import { loadConfig } from '@lib/config/config.loader';
 import { dispatch, parseArgv } from '@lib/core/dispatcher';
+import { CliError } from '@lib/errors/cli.error';
 import logger from '@lib/util/logger';
 import { suppressDEP0190 } from '@lib/util/node-patch';
 suppressDEP0190(); // suppress deprecation warning for passing arguments to a shell sub-process
@@ -15,7 +16,10 @@ await loadCommands();
 try {
   dispatch(command, args, config);
 } catch (error) {
-  // TODO: Improve error handling and reporting (e.g. show stack trace in debug mode, categorize errors, etc.)
-  logger.error(`Error executing command '${command}':`, (error as Error).message);
+  if (error instanceof CliError) {
+    error.handle();
+  }
+  logger.error(`Unexpected error executing command '${command}':`, (error as Error).message);
+  if (logger.shouldLog('debug')) logger.error(error);
   process.exit(1);
 }
