@@ -212,20 +212,7 @@ function setConfigValue<K extends keyof LoggerConfig>(key: K, value: LoggerConfi
   throw new Error('Cannot set config value on provided logger instance');
 }
 
-function loggerExampleUsage() {
-  const log = getLog({ prefix: '[my-app]', showTimestamp: true, level: 'debug' });
-  log.debug('This is a debug message');
-  log.log('This is a log message');
-  log.warn('This is a warning');
-  log.error('This is an error');
-  log.ml.log('This is a multi-line message\nwith multiple lines', 'for testing');
-  log.np.log('This is a message without a prefix');
-  log.indent().log('This message is indented by 2 spaces');
-  log.indent(4).log('This message is indented by 4 spaces');
-  log.indent(2).ml.log('This is a multi-line message\nwith indentation');
-}
-
 export default logger;
-export { ConsoleChannel, getLog, loggerExampleUsage, NullChannel, setConfigValue, setLogLevel };
+export { ConsoleChannel, getLog, NullChannel, setConfigValue, setLogLevel };
 export type { LogChannel, Logger, LoggerConfig, LogLevel };
 

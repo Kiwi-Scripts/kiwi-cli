@@ -73,6 +73,19 @@ class ArgParser {
   }
 
   parse() {
+    try {
+      return this.doParse();
+    } catch (error) {
+      if (error instanceof ArgParseError) {
+        logger.error(`Error parsing arguments for command '${this.command.name}': ${error.message}`);
+        logger.log(`Run 'kiwi help ${this.command.name}' for usage information.`);
+        process.exit(1);
+      }
+      throw error; // re-throw unexpected errors
+    }
+  }
+
+  private doParse() {
     this.extractOptionsAndPositionals();
     this.parsePositionalArgs();
     this.validateRequiredOptions();
@@ -103,7 +116,7 @@ class ArgParser {
       }
 
       // Short flag (e.g. -n)
-      if (token.startsWith('-') && token.length > 1 && !isNumericString(token)) {
+      if (token.startsWith('-') && token.length > 1 && !this.isNumericString(token)) {
         this.parseShortFlags(token);
         this.pointer++;
         continue;
@@ -116,7 +129,7 @@ class ArgParser {
   }
 
   private parseOption(token: string) {
-    const { name, value } = splitOptionToken(token);
+    const { name, value } = this.splitOptionToken(token);
     const def = this.optionByName.get(name) || this.optionByAlias.get(name);
 
     if (!def) {
@@ -127,7 +140,7 @@ class ArgParser {
   }
 
   private parseShortFlags(token: string) {
-    const { name, value } = splitOptionToken(token);
+    const { name, value } = this.splitOptionToken(token);
     const flags = name.split('');
     for (let i = 0; i < flags.length; i++) {
       const flag = flags[i];
@@ -153,10 +166,10 @@ class ArgParser {
   private parseOptionDef(def: OptionDef, value: string | undefined): string | number | boolean {
     if (def.type === 'boolean') {
       if (value !== undefined) {
-        return parseBooleanValue(value) ?? this.fail(`Invalid boolean value for --${def.name}: ${value}`);
+        return this.parseBooleanValue(value) ?? this.fail(`Invalid boolean value for --${def.name}: ${value}`);
       }
       // check the next arg for boolean value (e.g. --flag true/false) -> no result implies true (e.g. --flag)
-      const rawBoolean = parseBooleanValue(this.rawArgs[++this.pointer]);
+      const rawBoolean = this.parseBooleanValue(this.rawArgs[++this.pointer]);
       return rawBoolean ?? true;
     }
 
@@ -164,7 +177,7 @@ class ArgParser {
     if (raw === undefined) {
       this.fail(`Option --${def.name} requires a value`);
     }
-    return coerce(this.command, def.name, raw, def.type);
+    return this.coerce(this.command, def.name, raw, def.type);
   }
 
   private parsePositionalArgs() {
@@ -176,7 +189,7 @@ class ArgParser {
       const raw = this.positionalValues[i];
 
       if (raw !== undefined) {
-        this.positionalArgs[def.name] = coerce(this.command, def.name, raw, def.type);
+        this.positionalArgs[def.name] = this.coerce(this.command, def.name, raw, def.type);
       } else if (def.default !== undefined) {
         this.positionalArgs[def.name] = def.default;
       } else if (def.required) {
@@ -200,74 +213,68 @@ class ArgParser {
   }
 
   private fail(message: string): never {
-    fail(this.command, message);
+    throw new ArgParseError(message, this.command);
   }
-}
-
-function coerce(command: Command, name: string, raw: string, type: 'string' | 'number' | 'boolean'): string | number | boolean {
-  switch (type) {
-    case 'string':
-      return raw;
-    case 'number': {
-      const num = Number(raw);
-      if (Number.isNaN(num)) {
-        fail(command, `Expected a number for "${name}", got: "${raw}"`);
+  
+  private coerce(command: Command, name: string, raw: string, type: 'string' | 'number' | 'boolean'): string | number | boolean {
+    switch (type) {
+      case 'string':
+        return raw;
+      case 'number': {
+        const num = Number(raw);
+        if (Number.isNaN(num)) {
+          this.fail(`Expected a number for "${name}", got: "${raw}"`);
+        }
+        return num;
       }
-      return num;
+      case 'boolean':
+        return this.parseBooleanValue(raw) ?? this.fail(`Expected a boolean for "${name}", got: "${raw}"`);
     }
-    case 'boolean':
-      return parseBooleanValue(raw) ?? fail(command, `Expected a boolean for "${name}", got: "${raw}"`);
   }
-}
-
-function parseBooleanValue(raw: string | undefined): boolean | undefined {
-  if (raw === undefined) {
-    return undefined;
-  }
-  switch (raw.toLowerCase()) {
-    case 'true':
-    case '1':
-    case 'yes':
-      return true;
-    case 'false':
-    case '0':
-    case 'no':
-      return false;
-    default:
+  
+  private parseBooleanValue(raw: string | undefined): boolean | undefined {
+    if (raw === undefined) {
       return undefined;
+    }
+    switch (raw.toLowerCase()) {
+      case 'true':
+      case '1':
+      case 'yes':
+        return true;
+      case 'false':
+      case '0':
+      case 'no':
+        return false;
+      default:
+        return undefined;
+    }
   }
-}
-
-function isNumericString(value: string): boolean {
-  return /^-\d/.test(value);
-}
-
-function fail(command: Command, message: string): never {
-  logger.error(message);
-  // printUsage(command);
-  process.exit(1);
-}
-
-/**
- * Split an option token into name and optional inline value.
- * Only the first `=` is treated as separator.
- *
- * Examples:
- * ```
- *   --name          → { name: 'name',     value: undefined }
- *   --name=value    → { name: 'name',     value: 'value' }
- *   --equation=1=2  → { name: 'equation', value: '1=2' }
- *   -n=value        → { name: 'n',        value: 'value' }
- *   -n              → { name: 'n',        value: undefined }
- * ```
- */
-function splitOptionToken(token: string): ParsedOptionToken {
-  const match = token.match(/^--?([^=]+?)(?:=(.*))?$/);
-  if (!match) {
-    return { name: token, value: undefined };
+  
+  private isNumericString(value: string): boolean {
+    return /^-\d/.test(value);
   }
-  return {
-    name: match[1],
-    value: match[2],   // undefined if no '=' present, '' if --name= (empty value)
-  };
+  
+  /**
+   * Split an option token into name and optional inline value.
+   * Only the first `=` is treated as separator.
+   *
+   * Examples:
+   * ```
+   *   --name          → { name: 'name',     value: undefined }
+   *   --name=value    → { name: 'name',     value: 'value' }
+   *   --equation=1=2  → { name: 'equation', value: '1=2' }
+   *   -n=value        → { name: 'n',        value: 'value' }
+   *   -n              → { name: 'n',        value: undefined }
+   * ```
+   */
+  private splitOptionToken(token: string): ParsedOptionToken {
+    const match = token.match(/^--?([^=]+?)(?:=(.*))?$/);
+    if (!match) {
+      return { name: token, value: undefined };
+    }
+    return {
+      name: match[1],
+      value: match[2],   // undefined if no '=' present, '' if --name= (empty value)
+    };
+  }
 }

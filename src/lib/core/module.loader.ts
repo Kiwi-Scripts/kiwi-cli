@@ -1,26 +1,27 @@
-import { KiwiConfig } from '@lib/config/config.types';
 import logger from '@lib/util/logger';
 import chalk from 'chalk';
 import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
 
-const MODULE_FILENAME_EXTENSIONS = [
-  // typescript
-  ['.ts', '.mts', '.cts'],
-  // raw javascript
-  ['.js', '.mjs', '.cjs'],
-  // plain JSON
-  ['.json']
-];
-const TS_EXTENSIONS = MODULE_FILENAME_EXTENSIONS[0];
-const JS_EXTENSIONS = MODULE_FILENAME_EXTENSIONS[1];
-const JSON_EXTENSIONS = MODULE_FILENAME_EXTENSIONS[2];
+const TS_EXTENSIONS = Object.freeze(['.ts', '.mts', '.cts']);
+const JS_EXTENSIONS = Object.freeze(['.js', '.mjs', '.cjs']);
+const JSON_EXTENSIONS = Object.freeze(['.json']);
+export const MODULE_EXTENSIONS = Object.freeze({
+  ts: TS_EXTENSIONS,
+  js: JS_EXTENSIONS,
+  json: JSON_EXTENSIONS
+});
+export type ModuleType = keyof typeof MODULE_EXTENSIONS;
+
+export type TS_FILE = `${string}.ts` | `${string}.mts` | `${string}.cts`;
+export type JS_FILE = `${string}.js` | `${string}.mjs` | `${string}.cjs`;
+export type JSON_FILE = `${string}.json`;
 
 interface LoadModuleOptions {
   typeSuffix?: 'config' | 'command' | 'template' | 'script';
-  /** Restricted the a */
-  extType?: ('ts' | 'js' | 'json')[];
+  /** Restrict the allowed module types. */
+  extType?: ModuleType[];
   /** Suppress errors and warnings. Returns `null` on failure. */
   silent?: boolean;
   /** Require TS/JS modules to have a default export. */
@@ -28,21 +29,19 @@ interface LoadModuleOptions {
 }
 
 export async function loadModule(filePath: string, options: LoadModuleOptions = {}) {
-  const ext = path.extname(filePath);
-
   if (!isAllowedTypeSuffix(filePath, options.typeSuffix, options.silent)) return null;
 
-  if (JSON_EXTENSIONS.includes(ext)) {
+  if (isJsonFile(filePath)) {
     isAllowedExtension('json', options.extType, options.silent);
     return loadJsonModule(filePath);
   }
 
-  if (JS_EXTENSIONS.includes(ext)) {
+  if (isJavaScriptFile(filePath)) {
     isAllowedExtension('js', options.extType, options.silent);
     return assertDefaultExport(await loadJavaScriptModule(filePath, options.silent), filePath, options);
   }
 
-  if(TS_EXTENSIONS.includes(ext)) {
+  if(isTypeScriptFile(filePath)) {
     isAllowedExtension('ts', options.extType, options.silent);
     try {
       return assertDefaultExport(await loadTypeScriptModule(filePath, options.silent), filePath, options);
@@ -61,7 +60,7 @@ export async function loadModule(filePath: string, options: LoadModuleOptions = 
 
 // === json loading =================================================
 
-export function loadJsonModule(filePath: string) {
+export function loadJsonModule(filePath: JSON_FILE) {
   const abs = assertFileExists(filePath);
   logger.debug('Loading JSON file:', abs);
   const raw = fs.readFileSync(abs, 'utf8');
@@ -70,25 +69,16 @@ export function loadJsonModule(filePath: string) {
 
 // === javascript loading ===========================================
 
-export async function loadJavaScriptModule(filePath: string, silent = false) {
-  const ext = path.extname(filePath);
-  if (!JS_EXTENSIONS.includes(ext)) {
-    return terminate(`Invalid file type: '${filePath}'. Only JavaScript files are supported.`, silent);
-  }
+export async function loadJavaScriptModule(filePath: JS_FILE, silent = false) {
   const abs = assertFileExists(filePath);
   logger.debug('Loading JavaScript file:', abs);
   const mod = await import(url.pathToFileURL(abs).href);
-  return (mod.default ?? mod) as KiwiConfig;
+  return (mod.default ?? mod);
 }
 
 // === typescript specific loading using tsx  =======================
 
-export async function loadTypeScriptModule(filePath: string, silent = false) {
-  const ext = path.extname(filePath);
-  if (!TS_EXTENSIONS.includes(ext)) {
-    return terminate(`Invalid file type: '${filePath}'. Only TypeScript files are supported.`, silent);
-  }
-
+export async function loadTypeScriptModule(filePath: TS_FILE, silent = false) {
   const abs = assertFileExists(filePath);
   logger.debug('Loading TypeScript file:', abs);
   return await importWithTsx(abs);
@@ -104,6 +94,18 @@ async function importWithTsx(filePath: string) {
 
 // === helper functions =============================================
 
+export function isTypeScriptFile(filePath: string): filePath is TS_FILE {
+  return TS_EXTENSIONS.includes(path.extname(filePath));
+}
+
+export function isJavaScriptFile(filePath: string): filePath is JS_FILE {
+  return JS_EXTENSIONS.includes(path.extname(filePath));
+}
+
+export function isJsonFile(filePath: string): filePath is JSON_FILE {
+  return JSON_EXTENSIONS.includes(path.extname(filePath));
+}
+
 /** Asserts the the filepath exists. Returns the resolved path, or throws if its not found. */
 function assertFileExists(filePath: string) {
   const abs = path.resolve(filePath);
@@ -113,7 +115,7 @@ function assertFileExists(filePath: string) {
   return abs;
 }
 
-function isAllowedExtension(ext: string, allowedExtensions: string[] | undefined, silent = false) {
+function isAllowedExtension(ext: ModuleType, allowedExtensions: ModuleType[] | undefined, silent = false) {
   if (!allowedExtensions) return true;
   if (allowedExtensions.includes(ext)) return true;
   return terminate(`File extension '${ext}' is not allowed for this module type.`, silent);
@@ -127,8 +129,8 @@ function isAllowedTypeSuffix(filePath: string, typeSuffix: string | undefined, s
   return terminate(`File '${path.basename(filePath)}' does not match the required type suffix '${typeSuffix}'.`, silent);
 }
 
-function assertDefaultExport(mod: any, filePath: string, {required, silent}: {required?: boolean, silent?: boolean}) {
-  if (!mod || (required && !mod.default)) {
+function assertDefaultExport(mod: any, filePath: string, {requireDefaultExport, silent}: Pick<LoadModuleOptions, 'requireDefaultExport' | 'silent'>) {
+  if (!mod || (requireDefaultExport && !mod.default)) {
     return terminate(`Module '${path.basename(filePath)}' does not have a default export.`, silent);
   }
   logger.debug(`Module '${path.basename(filePath)}' has a default export.`);
