@@ -18,6 +18,8 @@ export interface OptionDef {
   readonly description?: string;
   readonly required?: boolean;
   readonly default?: string | number | boolean;
+  /** Allows the use of the command while ignoring required positionals. */
+  readonly standalone?: boolean;
 }
 
 // === Context ==================================================

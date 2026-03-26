@@ -36,18 +36,19 @@ export function parseCommandArgs(command: Command, rawArgs: string[]): { positio
 }
 
 class ArgParser {
-  readonly positionalDefs;
-  readonly optionDefs;
+  private readonly positionalDefs;
+  private readonly optionDefs;
 
-  readonly positionalValues: string[] = [];
-  readonly positionalArgs: Record<string, string | number | boolean> = {};
-  readonly options: Record<string, string | number | boolean> = {};
+  private readonly positionalValues: string[] = [];
+  private readonly positionalArgs: Record<string, string | number | boolean> = {};
+  private readonly options: Record<string, string | number | boolean> = {};
 
   // Build lookup maps for options
-  readonly optionByName = new Map<string, OptionDef>();
-  readonly optionByAlias = new Map<string, OptionDef>();
+  private readonly optionByName = new Map<string, OptionDef>();
+  private readonly optionByAlias = new Map<string, OptionDef>();
 
   private pointer = 0;
+  private hasStandloneOption = false;
 
   constructor(private readonly command: Command, private readonly rawArgs: string[]) {
     this.positionalDefs = this.command.positionalArgs ?? [];
@@ -140,6 +141,10 @@ class ArgParser {
   }
 
   private parseOptionDef(def: OptionDef, value: string | undefined): string | number | boolean {
+    if (def.standalone) {
+      this.hasStandloneOption = true;
+    }
+
     if (def.type === 'boolean') {
       if (value !== undefined) {
         return this.parseBooleanValue(value) ?? this.fail(`Invalid boolean value for --${def.name}: ${value}`);
@@ -168,7 +173,7 @@ class ArgParser {
         this.positionalArgs[def.name] = this.coerce(def.name, raw, def.type);
       } else if (def.default !== undefined) {
         this.positionalArgs[def.name] = def.default;
-      } else if (def.required) {
+      } else if (def.required && !this.hasStandloneOption) {
         this.fail(`Missing required positional argument: <${def.name}> (Pos: ${i + 1})`);
       }
     }
@@ -182,7 +187,7 @@ class ArgParser {
 
       if (def.default !== undefined) {
         this.options[def.name] = def.default; // apply default value
-      } else if (def.required) {
+      } else if (def.required && !this.hasStandloneOption) {
         this.fail(`Missing required option: --${def.name}`);
       }
     }

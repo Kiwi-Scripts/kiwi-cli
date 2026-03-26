@@ -12,7 +12,7 @@ const runCommand = defineCommand({
     { name: 'script', type: 'string', required: true, description: 'The script to run.' },
   ],
   options: [
-    { name: 'list', aliases: ['l'], type: 'boolean', default: false, description: 'Lists all available scripts.' },
+    { name: 'list', aliases: ['l'], type: 'boolean', default: false, description: 'Lists all available scripts.', standalone: true },
   ],
   async run(ctx) {
     if (ctx.options.list) {
