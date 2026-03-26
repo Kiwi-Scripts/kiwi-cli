@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "outDir": "dist",
+    "baseUrl": "src",
+    "paths": {
+      "@commands/*": ["lib/commands/own/*"],
+      "@lib/*": ["lib/*"]
+    }
+  },
+  "include": ["src/cli.ts", "src/index.ts", "src/lib"]
+}

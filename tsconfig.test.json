@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "baseUrl": "src",
+    "paths": {
+      "@commands/*": ["lib/commands/own/*"],
+      "@lib/*": ["lib/*"],
+      "@testutil/*": ["test/util/*"]
+    }
+  },
+  "include": ["src/test"],
+  "references": [
+    { "path": "./tsconfig.app.json" }
+  ]
+}
