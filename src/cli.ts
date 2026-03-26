@@ -14,7 +14,7 @@ const config = await loadConfig();
 await loadCommands();
 
 try {
-  dispatch(command, args, config);
+  await dispatch(command, args, config);
 } catch (error) {
   if (error instanceof CliError) {
     error.handle();
