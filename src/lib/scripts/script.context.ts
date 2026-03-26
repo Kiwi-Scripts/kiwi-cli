@@ -1,6 +1,7 @@
 import { CaptureResult, Script, ScriptContext } from '@lib/scripts/script.types';
 import logger from '@lib/util/logger';
 import { spawn } from 'node:child_process';
+import rl from 'readline';
 
 /**
  * Creates a fully hydrated ScriptContext for a given script and input map.
@@ -57,13 +58,13 @@ function capture(command: string, args: string[] = []): Promise<CaptureResult> {
 }
 
 function prompt(message: string, defaultValue?: string): Promise<string> {
+  logger.debug(`[script:prompt] ${message} (default: ${defaultValue})`);
   return new Promise((resolve) => {
     const promptMsg = defaultValue ? `${message} (${defaultValue}): ` : `${message}: `;
-    process.stdout.write(promptMsg);
-    process.stdin.setEncoding('utf-8');
-    process.stdin.once('data', (data: Buffer) => {
-      const input = data.toString().trim();
-      resolve(input || defaultValue || '');
+    const rlInterface = rl.createInterface({ input: process.stdin, output: process.stdout });
+    rlInterface.question(promptMsg, answer => {
+      resolve(answer || defaultValue || '');
+      rlInterface.close();
     });
   });
 }
