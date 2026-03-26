@@ -1,39 +1,46 @@
 import healthCommand from '@commands/health.cmd';
 import helpCommand from '@commands/help.cmd';
 import initCommand from '@commands/init.cmd';
+import listCommand from '@commands/list.cmd';
 import uuidCommand from '@commands/uuid.cmd';
 import versionCommand from '@commands/version.cmd';
 import { Command } from '@lib/commands/command.types';
 import { getConfig } from '@lib/config/config.loader';
 import { KiwiConfigInternal } from '@lib/config/config.types';
+import { CliError } from '@lib/errors/cli.error';
 import logger from '@lib/util/logger';
+
+export type CommandSource = 'builtin' | 'user-global' | 'user-local';
 
 const commands = new Map<string, Command>();
 const commandAliases = new Map<string, string>();
+const commandSources = new Map<string, CommandSource>();
 
 /** A union of all known (i.e. built-in) commands. */
-export type KnownCommands = 'help' | 'version' | 'health' | 'init' | 'uuid';
+export type KnownCommands = 'help' | 'version' | 'health' | 'init' | 'uuid' | 'list';
 export const ownCommands = [
   helpCommand,
   versionCommand,
   healthCommand,
   initCommand,
   uuidCommand,
+  listCommand
 ] as const;
-ownCommands.forEach(registerCommand);
+ownCommands.forEach(cmd => registerCommand(cmd));
 
-export function registerCommand(command: Command) {
+export function registerCommand(command: Command, source: CommandSource = 'builtin') {
   if (commands.has(command.name)) {
     logger.warn(`Command '${command.name}' was registered before. Overwriting...`);
   }
   commands.set(command.name, command);
+  commandSources.set(command.name, source);
   registerAlias(command);
 }
 
 function registerAlias(command: Command) {
   if (!command.alias) return;
   if (commandAliases.has(command.alias)) {
-    throw new Error(`Alias '${command.alias}' was already registered! (existing: '${commandAliases.get(command.alias)}', new: '${command.name}')`);
+    throw new CliError(`Alias '${command.alias}' was already registered! (existing: '${commandAliases.get(command.alias)}', new: '${command.name}')`);
   }
   commandAliases.set(command.alias, command.name);
 }
@@ -50,6 +57,16 @@ export function getAllCommands() {
 
 export function resolveAlias(alias: string) {
   return commandAliases.get(alias) ?? alias;
+}
+
+export function getCommandsBySource(source: CommandSource): Command[] {
+  return [...commands.entries()]
+    .filter(([name]) => commandSources.get(name) === source)
+    .map(([, cmd]) => cmd);
+}
+
+export function getCommandAliases(): ReadonlyMap<string, string> {
+  return commandAliases;
 }
 
 export function isKnownCommand(name: string): name is KnownCommands {

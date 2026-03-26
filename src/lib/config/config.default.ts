@@ -65,7 +65,6 @@ const DEFAULT_CONFIG: KiwiConfig = {
     s: 'serve',
     t: 'test',
     e: 'e2e',
-    c: 'config',
     d: 'deploy',
     l: 'lint',
   }

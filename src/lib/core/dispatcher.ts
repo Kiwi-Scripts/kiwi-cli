@@ -74,7 +74,7 @@ function resolveCommandContext(command: Command, args: string[], config: KiwiCon
  * @param config The Kiwi configuration object containing associations.
  * @returns The associated CLI if a match is found, otherwise undefined.
  */
-function resolveAssociation(command: string | undefined, config: KiwiConfig) {
+export function resolveAssociation(command: string | undefined, config: KiwiConfig) {
   if (command) {
     for (const [key, value] of Object.entries(config.associations ?? {})) {
       if (value.includes(command)) {
