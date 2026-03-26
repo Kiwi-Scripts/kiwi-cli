@@ -6,6 +6,7 @@ import { dispatch, parseArgv } from '@lib/core/dispatcher';
 import { CliError } from '@lib/errors/cli.error';
 import logger from '@lib/util/logger';
 import { suppressDEP0190 } from '@lib/util/node-patch';
+import chalk from 'chalk';
 suppressDEP0190(); // suppress deprecation warning for passing arguments to a shell sub-process
 
 const {command, args} = parseArgv(process.argv);
@@ -19,7 +20,11 @@ try {
   if (error instanceof CliError) {
     error.handle();
   }
-  logger.error(`Unexpected error executing command '${command}':`, (error as Error).message);
-  if (logger.shouldLog('debug')) logger.error(error);
+  logger.np.log();
+  logger.error(`${chalk.bold('Unexpected Error')}: ${(error as Error).message}`);
+  if (logger.shouldLog('debug') && (error as Error).stack) {
+    logger.error(chalk.dim((error as Error).stack!));
+  }
+  logger.np.log();
   process.exit(1);
 }
