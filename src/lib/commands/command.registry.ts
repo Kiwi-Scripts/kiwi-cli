@@ -7,7 +7,6 @@ import versionCommand from '@commands/version.cmd';
 import { Command } from '@lib/commands/command.types';
 import { getConfig } from '@lib/config/config.loader';
 import { KiwiConfigInternal } from '@lib/config/config.types';
-import { CliError } from '@lib/errors/cli.error';
 import logger from '@lib/util/logger';
 
 export type CommandSource = 'builtin' | 'user-global' | 'user-local';
@@ -40,7 +39,7 @@ export function registerCommand(command: Command, source: CommandSource = 'built
 function registerAlias(command: Command) {
   if (!command.alias) return;
   if (commandAliases.has(command.alias)) {
-    throw new CliError(`Alias '${command.alias}' was already registered! (existing: '${commandAliases.get(command.alias)}', new: '${command.name}')`);
+    logger.warn(`Alias '${command.alias}' was already registered! (existing: '${commandAliases.get(command.alias)}', new: '${command.name}')`);
   }
   commandAliases.set(command.alias, command.name);
 }
