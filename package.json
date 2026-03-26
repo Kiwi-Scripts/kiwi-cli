@@ -1,6 +1,6 @@
 {
   "name": "@kiwi-js/cli",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Helper scripts CLI for workflow optimization.",
   "keywords": [
     "cli",
@@ -42,6 +42,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch --config tsup.dev.config.ts",
+    "test": "vitest",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
@@ -51,7 +52,8 @@
   "devDependencies": {
     "@types/node": "^25.5.0",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.1"
   },
   "optionalDependencies": {
     "clipboardy": "^5.3.1",
