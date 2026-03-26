@@ -9,6 +9,7 @@ import { globalFlags } from '@lib/util/global-flags';
 import logger from '@lib/util/logger';
 import { suppressDEP0190 } from '@lib/util/node-patch';
 import chalk from 'chalk';
+export { fsTree, globalFlags, logger }; // re-export for use in commands and other modules
 suppressDEP0190(); // suppress deprecation warning for passing arguments to a shell sub-process
 
 const {command, args} = parseArgv(process.argv);

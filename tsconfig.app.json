@@ -3,12 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "declaration": true,
-    "outDir": "dist",
-    "baseUrl": "src",
-    "paths": {
-      "@commands/*": ["lib/commands/own/*"],
-      "@lib/*": ["lib/*"]
-    }
+    "outDir": "dist"
   },
   "include": ["src/cli.ts", "src/index.ts", "src/lib"]
 }

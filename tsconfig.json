@@ -8,7 +8,13 @@
     "strictNullChecks": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "baseUrl": "src",
+    "paths": {
+      "@commands/*": ["lib/commands/own/*"],
+      "@lib/*": ["lib/*"],
+      "templates": ["lib/templates/template.registry"],
+    }
   },
   "files": [],
   "references": [
