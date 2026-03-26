@@ -63,9 +63,11 @@ function printAliases(
   }
   for (const [alias, command] of configEntries) {
     const targetCli = resolveAssociation(command, config);
-    const conflict = commandAliases.has(alias) || allAliases.some(a => a.alias === alias) || !targetCli;
+    const conflict = !targetCli;
     allAliases.push({ alias, command, targetCli, source: 'config', conflict });
   }
+
+  markAliasConflicts(allAliases);
 
   const aliasWidth = allAliases.reduce((max, a) => Math.max(max, a.alias.length), 0) + 2;
   const targetCliWidth = allAliases.reduce((max, a) => Math.max(max, a.targetCli?.length ?? 0), 0) + 1;
@@ -77,4 +79,15 @@ function printAliases(
       `${(conflict ? chalk.red : chalk.cyan)(alias.padEnd(aliasWidth))}${chalk.dim('→')} ${chalk.dim(targetCli?.padEnd(targetCliWidth) ?? '')}${command.padEnd(commandWidth + (targetCli ? 0 : targetCliWidth))}${chalk.dim(`(${source})`)}`,
     );
   }
+}
+
+function markAliasConflicts(allAliases: AliasInfo[]) {
+  const aliasCounts = new Map<string, number>();
+  for (const { alias } of allAliases) {
+    aliasCounts.set(alias, (aliasCounts.get(alias) ?? 0) + 1);
+  }
+  const conflicts = [...aliasCounts.entries()]
+    .filter(([, count]) => count > 1)
+    .flatMap(([alias]) => allAliases.filter(a => a.alias === alias));
+  conflicts.forEach(c => c.conflict = true);
 }
