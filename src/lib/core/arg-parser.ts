@@ -153,19 +153,19 @@ class ArgParser {
     if (raw === undefined) {
       this.fail(`Option --${def.name} requires a value`);
     }
-    return this.coerce(this.command, def.name, raw, def.type);
+    return this.coerce(def.name, raw, def.type);
   }
 
   private parsePositionalArgs() {
     if (this.positionalValues.length > this.positionalDefs.length) {
       this.fail(`Too many positional arguments. Expected at most ${this.positionalDefs.length} but got ${this.positionalValues.length}`);
     }
-    for (let i = 0; i < this.positionalValues.length; i++) {
+    for (let i = 0; i < this.positionalDefs.length; i++) {
       const def = this.positionalDefs[i];
       const raw = this.positionalValues[i];
 
       if (raw !== undefined) {
-        this.positionalArgs[def.name] = this.coerce(this.command, def.name, raw, def.type);
+        this.positionalArgs[def.name] = this.coerce(def.name, raw, def.type);
       } else if (def.default !== undefined) {
         this.positionalArgs[def.name] = def.default;
       } else if (def.required) {
@@ -192,7 +192,7 @@ class ArgParser {
     throw new ArgParseError(message, this.command);
   }
   
-  private coerce(command: Command, name: string, raw: string, type: 'string' | 'number' | 'boolean'): string | number | boolean {
+  private coerce(name: string, raw: string, type: 'string' | 'number' | 'boolean'): string | number | boolean {
     switch (type) {
       case 'string':
         return raw;
