@@ -6,6 +6,7 @@ export default defineConfig({
     alias: {
       '@lib': path.resolve('src/lib'),
       '@commands': path.resolve('src/lib/commands/own'),
+      '@testutil': path.resolve('src/test/util'),
     },
   },
   test: {

@@ -89,7 +89,7 @@ abstract class BaseFsTree implements FsTree {
   protected logAction(action: FileAction): void {
     const label = ACTION_LABELS[action.kind];
     const color = ACTION_COLORS[action.kind];
-    logger.log(`${color(`[${label}]`)} ${action.path}`);
+    logger.log(`${color(`${label}`)} ${action.path}`);
   }
 }
 
