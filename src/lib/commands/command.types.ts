@@ -38,6 +38,11 @@ export interface CommandContext<
 
 // === Command Definition (generic, used at definition site) ====
 
+interface AdvancedConfigs {
+  /** If false, allows passing more positional arguments than defined and unknown options without throwing an error. */
+  strict?: boolean;
+}
+
 export interface CommandDef<
   TArgs extends readonly PositionalArgDef[] = [],
   TOpts extends readonly OptionDef[] = [],
@@ -47,7 +52,7 @@ export interface CommandDef<
   alias?: string;
   positionalArgs?: TArgs;
   options?: TOpts;
-  advancedConfig?: Record<string, unknown>;
+  advancedConfig?: AdvancedConfigs;
   run(ctx: CommandContext<TArgs, TOpts>): void | Promise<void>;
 }
 

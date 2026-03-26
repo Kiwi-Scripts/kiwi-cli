@@ -1,6 +1,6 @@
 import { Command, CommandContext, OptionDef } from '@lib/commands/command.types';
 import { ArgParseError } from '@lib/errors/arg-parser.error';
-import { logger } from 'cli';
+import logger from '@lib/util/logger';
 
 interface ParsedOptionToken {
   name: string;
@@ -111,6 +111,7 @@ class ArgParser {
     const def = this.optionByName.get(name) || this.optionByAlias.get(name);
 
     if (!def) {
+      if (this.isStrictMode()) this.fail(`Unknown option: --${name}`);
       logger.debug(`Unknown option: --${name}`);
       return;
     }
@@ -126,6 +127,7 @@ class ArgParser {
       const def = this.optionByAlias.get(flag);
 
       if (!def) {
+        if (this.isStrictMode()) this.fail(`Unknown option: -${flag}`);
         logger.debug(`Unknown option: -${flag}`);
         continue;
       }
@@ -165,7 +167,7 @@ class ArgParser {
   }
 
   private parsePositionalArgs() {
-    if (this.positionalValues.length > this.positionalDefs.length && !this.command.advancedConfig?.ignoreMaxPositionalArgs) {
+    if (this.positionalValues.length > this.positionalDefs.length && this.isStrictMode()) {
       this.fail(`Too many positional arguments. Expected at most ${this.positionalDefs.length} but got ${this.positionalValues.length}`);
     }
     for (let i = 0; i < this.positionalDefs.length; i++) {
@@ -260,5 +262,9 @@ class ArgParser {
       name: match[1],
       value: match[2],   // undefined if no '=' present, '' if --name= (empty value)
     };
+  }
+
+  private isStrictMode(): boolean {
+    return this.command.advancedConfig?.strict !== false;
   }
 }

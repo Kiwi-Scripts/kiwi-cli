@@ -15,7 +15,7 @@ const runCommand = defineCommand({
     { name: 'list', aliases: ['l'], type: 'boolean', default: false, description: 'Lists all available scripts.', standalone: true },
   ],
   advancedConfig: {
-    ignoreMaxPositionalArgs: true, // allow passing extra args to scripts without arg parser complaining about too many positionals
+    strict: false,
   },
   async run(ctx) {
     if (ctx.options.list) {

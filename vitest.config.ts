@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { defineConfig } from 'vitest/config';
+import pkg from "./package.json";
 
 export default defineConfig({
   resolve: {
@@ -12,4 +13,7 @@ export default defineConfig({
   test: {
     include: ['src/test/**/*.test.ts'],
   },
+  define: {
+    __VERSION__: JSON.stringify(pkg.version)
+  }
 });
