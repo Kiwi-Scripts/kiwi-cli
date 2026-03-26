@@ -47,6 +47,7 @@ export interface CommandDef<
   alias?: string;
   positionalArgs?: TArgs;
   options?: TOpts;
+  advancedConfig?: Record<string, unknown>;
   run(ctx: CommandContext<TArgs, TOpts>): void | Promise<void>;
 }
 

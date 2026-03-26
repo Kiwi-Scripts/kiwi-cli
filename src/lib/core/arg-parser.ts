@@ -1,5 +1,6 @@
 import { Command, CommandContext, OptionDef } from '@lib/commands/command.types';
 import { ArgParseError } from '@lib/errors/arg-parser.error';
+import { logger } from 'cli';
 
 interface ParsedOptionToken {
   name: string;
@@ -110,7 +111,8 @@ class ArgParser {
     const def = this.optionByName.get(name) || this.optionByAlias.get(name);
 
     if (!def) {
-      this.fail(`Unknown option: --${name}`);
+      logger.debug(`Unknown option: --${name}`);
+      return;
     }
 
     this.options[def.name] = this.parseOptionDef(def, value);
@@ -124,7 +126,8 @@ class ArgParser {
       const def = this.optionByAlias.get(flag);
 
       if (!def) {
-        this.fail(`Unknown option: -${flag}`);
+        logger.debug(`Unknown option: -${flag}`);
+        continue;
       }
 
       if (i !== flags.length - 1) {
@@ -162,7 +165,7 @@ class ArgParser {
   }
 
   private parsePositionalArgs() {
-    if (this.positionalValues.length > this.positionalDefs.length) {
+    if (this.positionalValues.length > this.positionalDefs.length && !this.command.advancedConfig?.ignoreMaxPositionalArgs) {
       this.fail(`Too many positional arguments. Expected at most ${this.positionalDefs.length} but got ${this.positionalValues.length}`);
     }
     for (let i = 0; i < this.positionalDefs.length; i++) {
