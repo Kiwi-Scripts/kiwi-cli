@@ -163,17 +163,17 @@ function printArgEntry(arg: PositionalArgDef, colWidths: ColumnWidths): void {
   const label = [names, type, req].join(' ').trimEnd();
   const desc = formatDesc(colWidths, arg.description, arg.default);
 
-  logger.ml.indent.log(`${label}  ${desc}`);
+  logger.ml.indent.log(`${label} ${chalk.dim('→')} ${desc}`);
 }
 
 function printOptionEntry(opt: OptionDef, colWidths: ColumnWidths): void {
   const names = formatOptionNames(opt).padEnd(colWidths.name);
   const type = formatType(opt.type);
   const req = opt.required ? chalk.yellow('*') : colWidths.req ? ' ' : undefined; // only add space if req column exists to keep alignment
-  const label = [names, type, req].join(' ').trimEnd();
+  const label = [names, type, req].join(' ');
   const desc = formatDesc(colWidths, opt.description, opt.default);
 
-  logger.ml.indent.log(`${label}  ${desc}`);
+  logger.ml.indent.log(`${label} ${chalk.dim('→')} ${desc}`);
 }
 
 function formatOptionNames(option: OptionDef): string {
