@@ -1,3 +1,4 @@
+import confirmYesNoScript from '@lib/scripts/own/confirm.script';
 import { Script } from '@lib/scripts/script.types';
 import logger from '@lib/util/logger';
 
@@ -5,6 +6,11 @@ export type ScriptSource = 'builtin' | 'user-global' | 'user-local';
 
 const scripts = new Map<string, Script>();
 const scriptSources = new Map<string, ScriptSource>();
+
+const ownScripts = [
+  confirmYesNoScript
+] as const;
+ownScripts.forEach(script => registerScript(script, 'builtin'));
 
 export function registerScript(script: Script, source: ScriptSource) {
   if (scripts.has(script.name)) {
