@@ -1,15 +1,5 @@
 import { KiwiConfigInternal } from '@lib/config/config.types';
-import { Prettify } from '@lib/util/types';
-
-// === Type Mapping =============================================
-
-type TypeMap = {
-  string: string;
-  number: number;
-  boolean: boolean;
-};
-
-type ArgType = keyof TypeMap;
+import { ArgType, InferParsed } from '@lib/util/types';
 
 // === Definitions ==============================================
 
@@ -29,31 +19,6 @@ export interface OptionDef {
   readonly required?: boolean;
   readonly default?: string | number | boolean;
 }
-
-// === Inference Engine =========================================
-
-/**
- * A value is guaranteed (non-optional) if `required: true`
- * or an explicit `default` is provided.
- */
-type IsGuaranteed<T> =
-  T extends { required: true } ? true :
-  T extends { default: string | number | boolean } ? true :
-  false;
-
-/**
- * Maps a tuple of arg/option defs into a typed object.
- *
- * Given: [{ name: 'count', type: 'number', required: true }, { name: 'verbose', type: 'boolean' }]
- * Produces: { count: number; verbose?: boolean }
- */
-type InferParsed<Defs extends readonly { readonly name: string; readonly type: ArgType }[]> = Prettify<
-  // Guaranteed keys → required properties
-  { [D in Defs[number] as IsGuaranteed<D> extends true ? D['name'] : never]: TypeMap[D['type']] }
-  &
-  // Non-guaranteed keys → optional properties
-  { [D in Defs[number] as IsGuaranteed<D> extends true ? never : D['name']]?: TypeMap[D['type']] }
->;
 
 // === Context ==================================================
 

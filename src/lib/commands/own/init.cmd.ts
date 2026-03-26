@@ -12,12 +12,16 @@ const initCommand = defineCommand({
   ],
   async run(ctx) {
     const targetDir = ctx.options.global ? kiwiPathsGlobal.userHome : kiwiPaths.projectRoot;
-    const resultDir = path.join(targetDir, '.kiwi', 'commands');
 
-    fsTree.createDir(resultDir);
+    const commandsDir = path.join(targetDir, '.kiwi', 'commands');
+    const scriptsDir = path.join(targetDir, '.kiwi', 'scripts');
 
-    const { tsTemplate } = await loadTemplates();
-    fsTree.writeFile(path.join(resultDir, 'template.command.ts'), tsTemplate);
+    fsTree.createDir(commandsDir);
+    fsTree.createDir(scriptsDir);
+
+    const { tsCommandTemplate, tsScriptTemplate } = await loadTemplates();
+    fsTree.writeFile(path.join(commandsDir, 'template.command.ts'), tsCommandTemplate);
+    fsTree.writeFile(path.join(scriptsDir, 'template.script.ts'), tsScriptTemplate);
   },
 });
 export default initCommand;

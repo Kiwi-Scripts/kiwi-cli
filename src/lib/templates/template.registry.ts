@@ -1,4 +1,4 @@
-export const tsTemplate = `import { defineCommand } from '@kiwi-js/cli';
+export const tsCommandTemplate = `import { defineCommand } from '@kiwi-js/cli';
 
 export default defineCommand({
   name: 'template',
@@ -18,5 +18,28 @@ export default defineCommand({
     ctx.options.defOpt;      // default,  never undefined,    'boolean' typed      -"-
     ctx.positionalArgs.pos1; // required, never undefined,    'string' typed       -"-
     ctx.rawArgs;             // the raw argv input array (without bin entries)
+  },
+});`
+
+export const tsScriptTemplate = `import { defineScript } from '@kiwi-js/cli';
+
+export default defineScript({
+  name: 'template',
+  description: 'My awesome script.',
+  input: [
+    { name: 'target', type: 'string', required: true, description: 'The build target.' },
+    { name: 'verbose', type: 'boolean', default: false, description: 'Enable verbose output.' },
+  ],
+  async run(ctx) {
+    // ctx.input is fully typed based on the input definitions above
+    const target = ctx.input.target;   // string (required, always defined)
+    const verbose = ctx.input.verbose; // boolean (has default, always defined)
+
+    // Execute a command with inherited stdio (interactive)
+    await ctx.exec('echo', ['Building', target]);
+
+    // Or capture stdout/stderr for processing
+    const result = await ctx.capture('echo', ['done']);
+    console.log(result.stdout.trim());
   },
 });`

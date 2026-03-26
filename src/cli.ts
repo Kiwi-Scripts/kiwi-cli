@@ -4,6 +4,7 @@ import { loadCommands } from '@lib/commands/command.loader';
 import { loadConfig } from '@lib/config/config.loader';
 import { dispatch, parseArgv } from '@lib/core/dispatcher';
 import { CliError } from '@lib/errors/cli.error';
+import { loadScripts } from '@lib/scripts/script.loader';
 import fsTree from '@lib/util/fs-tree';
 import { globalFlags } from '@lib/util/global-flags';
 import logger from '@lib/util/logger';
@@ -16,6 +17,7 @@ const {command, args} = parseArgv(process.argv);
 
 const config = await loadConfig();
 await loadCommands();
+await loadScripts();
 
 try {
   await dispatch(command, args, config);
