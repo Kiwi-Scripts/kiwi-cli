@@ -1,16 +1,36 @@
 import logger, { setLogLevel } from '@lib/util/logger';
 
-export function extractGlobalFlags(args: string[]) {
-  return handleVerbose(args);
+export interface GlobalFlags {
+  verbose: boolean;
+  dryRun: boolean;
 }
 
-function handleVerbose(args: string[]) {
-  if (args.includes('--verbose')) {
+export const globalFlags: GlobalFlags = {
+  verbose: false,
+  dryRun: false,
+};
+
+export function extractGlobalFlags(args: string[]) {
+  let cleaned = [...args];
+  cleaned = handleFlag(cleaned, '--verbose', () => {
+    globalFlags.verbose = true;
     setLogLevel('debug');
-    const cleanedArgs = [...args];
-    cleanedArgs.splice(args.indexOf('--verbose'), 1);
-    logger.debug('Verbose mode enabled. Arguments after removing --verbose:', cleanedArgs);
-    return cleanedArgs;
+  });
+  cleaned = handleFlag(cleaned, '--dry-run', () => {
+    globalFlags.dryRun = true;
+  });
+  if (globalFlags.verbose) {
+    logger.debug('Global flags:', globalFlags);
+    logger.debug('Arguments after extracting global flags:', cleaned);
   }
-  return args;
+  return cleaned;
+}
+
+function handleFlag(args: string[], flag: string, activate: () => void): string[] {
+  const index = args.indexOf(flag);
+  if (index === -1) return args;
+  activate();
+  const cleaned = [...args];
+  cleaned.splice(index, 1);
+  return cleaned;
 }

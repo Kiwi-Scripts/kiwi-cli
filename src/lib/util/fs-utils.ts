@@ -1,5 +1,6 @@
+import { FileSystemError } from '@lib/errors/fs.error';
+import fsTree from '@lib/util/fs-tree';
 import logger from '@lib/util/logger';
-import fs from 'node:fs';
 import path from 'node:path';
 
 /**
@@ -9,12 +10,12 @@ import path from 'node:path';
  * @returns The path to the ensured directory.
  */
 export function ensureDir(dirPath: string, actionOnMissing: 'throw' | 'create' = 'create') {
-  if (!fs.existsSync(dirPath)) {
+  if (!fsTree.exists(dirPath)) {
     if (actionOnMissing === 'throw') {
-      throw new Error(`Directory does not exist: ${dirPath}`);
+      throw new FileSystemError(`Directory does not exist`, dirPath);
     } else if (actionOnMissing === 'create') {
       logger.debug(`Creating missing directory: ${dirPath}`);
-      fs.mkdirSync(dirPath, { recursive: true });
+      fsTree.createDir(dirPath);
     }
   }
   return dirPath;
@@ -22,8 +23,8 @@ export function ensureDir(dirPath: string, actionOnMissing: 'throw' | 'create' =
 
 /** Ensures that a file exists. Throws an error if the file does not exist. */
 export function ensureFile(filePath: string): string {
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`File does not exist: ${filePath}`);
+  if (!fsTree.exists(filePath)) {
+    throw new FileSystemError(`File does not exist`, filePath);
   }
   return filePath;
 }
@@ -38,10 +39,10 @@ export function ensureFile(filePath: string): string {
  */
 export function findFileByName(dirPath: string, fileName: string, extensions?: string[]): string | null {
   const dir = ensureDir(dirPath, 'throw');
-  const candidates = fs.readdirSync(dir);
+  const candidates = fsTree.readDir(dir);
   const matchingFiles = candidates.filter(candidate => {
     const fullPath = `${dir}/${candidate}`;
-    const isFile = fs.statSync(fullPath).isFile();
+    const isFile = fsTree.host.statSync(fullPath).isFile();
     if (!isFile) return false;
     if (extensions && !extensions.includes(path.extname(candidate))) return false;
     return candidate.startsWith(fileName);

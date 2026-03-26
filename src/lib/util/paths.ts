@@ -1,5 +1,5 @@
+import fsTree from '@lib/util/fs-tree';
 import lazySingleton from '@lib/util/lazy-singleton';
-import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -173,7 +173,7 @@ export class PathResolver {
       absolute = path.resolve(baseTarget, fromPosixPath(normalized));
     }
 
-    if (options.mustExist && !fs.existsSync(absolute)) {
+    if (options.mustExist && !fsTree.exists(absolute)) {
       throw new Error(`Resolved path does not exist: ${absolute}`);
     }
 
@@ -281,7 +281,7 @@ export function findProjectRoot(
 
   while (true) {
     const hasMarker = markers.some((marker) =>
-      fs.existsSync(path.join(current, marker)),
+      fsTree.exists(path.join(current, marker)),
     );
 
     if (hasMarker) {

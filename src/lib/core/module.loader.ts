@@ -1,8 +1,8 @@
 import { ModuleLoadingError } from '@lib/errors/module.error';
+import fsTree from '@lib/util/fs-tree';
 import { ensureFile } from '@lib/util/fs-utils';
 import logger from '@lib/util/logger';
 import { loadOptionalDep } from '@lib/util/optional-deps';
-import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
 
@@ -60,7 +60,7 @@ export async function loadModule(filePath: string, options: LoadModuleOptions = 
 export function loadJsonModule(filePath: JSON_FILE) {
   const abs = ensureFile(filePath);
   logger.debug('Loading JSON file:', abs);
-  const raw = fs.readFileSync(abs, 'utf8');
+  const raw = fsTree.readFile(abs);
   return JSON.parse(raw);
 }
 
