@@ -36,7 +36,7 @@ User-defined commands via `.kiwi/` directory with TypeScript support.
   - [ ] `ctx.exec()` (interactive): regular terminal behavior, essentially passthrough
   - [ ] `ctx.capture()` (piped): capture the output/result of a process and react to it, essentially piping it into other commands/scripts
   - [ ] `ctx.confirm()` (prompts): explicitly query the user for input
-- [ ] **`kiwi list`:** Show all registered commands and their source (built-in / user script) (essentially `kiwi help` without additional arguments)
+- [x] **`kiwi list`:** Show all registered commands and their source (built-in / user script) (essentially `kiwi help` without additional arguments)
 
 ## Phase 3 — Developer Experience
 
@@ -47,8 +47,8 @@ Polish, error handling, and quality-of-life features.
   - [x] Create command template `commands/template.command.ts`
   - [ ] Create script template `scripts/template.script.ts`
   - [x] Switch between local & global with `--global` flag
-- [ ] **Pretty error output:** Catch script errors, display context, suggest fixes
-- [ ] **`--dry-run` flag:** Print commands that would execute without running them
+- [x] **Pretty error output:** Catch script errors, display context, suggest fixes
+- [x] **`--dry-run` flag:** Print commands that would execute without running them
 - [x] **`--verbose` flag:** Show dispatcher decisions, config loading, script discovery (enables `debug` log-level)
 - [x] **Structured logging:** Prefixed, leveled output (`log`, `warn`, `error`) via context logger
 - [x] **Command associations:** Configure default mappings for commands and their targeted cli (`fetch` -> `git`)\
