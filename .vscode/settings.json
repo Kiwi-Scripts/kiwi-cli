@@ -5,6 +5,7 @@
 	"editor.tabSize": 2,
 	"editor.detectIndentation": false,
 	"js/ts.preferences.importModuleSpecifier": "non-relative",
+  "js/ts.preferences.autoImportFileExcludePatterns": ["**/cli.ts"],
 	"js/ts.preferences.quoteStyle": "single",
   "editor.codeActionsOnSave": {
     "source.fixAll.ts": "explicit",
