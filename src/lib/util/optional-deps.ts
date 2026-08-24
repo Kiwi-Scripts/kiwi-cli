@@ -13,6 +13,11 @@ type OptionalDepTypes = {
 type OptionalDepName = keyof OptionalDepTypes | (string & {});
 type ResolveOptionalDep<T extends OptionalDepName> = T extends keyof OptionalDepTypes ? OptionalDepTypes[T] : unknown;
 
+const optionalDeps = {
+  clipboardy: 'clipboardy',
+  tsx: 'tsx/esm/api'
+}
+
 export async function loadOptionalDep<T extends OptionalDepName>(
   packageName: T,
   messageOnFailure?: string
@@ -24,7 +29,7 @@ export async function loadOptionalDep<T extends OptionalDepName>(
   if (cached !== undefined) return cached;
   
   try {
-    const mod = await import(packageName as string);
+    const mod = await import(optionalDeps[packageName as keyof typeof optionalDeps] ?? packageName);
     cache.set(packageName, mod);
     return mod;
   } catch (error) {

@@ -17,7 +17,7 @@ export default defineConfig([
     splitting: false,
     external: [
       'templates',
-      'tsx',
+      'tsx/esm/api',
       'clipboardy'
     ],
     define: {
