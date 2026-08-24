@@ -48,6 +48,7 @@ export async function loadModule(filePath: string, options: LoadModuleOptions = 
     try {
       return assertDefaultExport(await loadTypeScriptModule(filePath, options.silent), filePath, options);
     } catch (error) {
+      logger.debug( error )
       return terminate(`Failed to load TypeScript module: '${filePath}'. Error: ${(error as Error).message}`, options.silent);
     }
   }
@@ -70,7 +71,7 @@ export async function loadJavaScriptModule(filePath: JS_FILE, silent = false) {
   const abs = ensureFile(filePath);
   logger.debug('Loading JavaScript file:', abs);
   const mod = await import(url.pathToFileURL(abs).href);
-  return (mod.default ?? mod);
+  return mod;
 }
 
 // === typescript specific loading using tsx  =======================
@@ -119,6 +120,7 @@ function isAllowedTypeSuffix(filePath: string, typeSuffix: string | undefined, s
 
 function assertDefaultExport(mod: any, filePath: string, {requireDefaultExport, silent}: Pick<LoadModuleOptions, 'requireDefaultExport' | 'silent'>) {
   if (!mod || (requireDefaultExport && !mod.default)) {
+    logger.warn(mod);
     return terminate(`Module '${path.basename(filePath)}' does not have a default export.`, silent);
   }
   logger.debug(`Module '${path.basename(filePath)}' has a default export.`);
