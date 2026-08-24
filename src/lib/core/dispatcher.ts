@@ -2,9 +2,14 @@ import { getCommand, resolveAlias as resolveAliasInternal } from '@lib/commands/
 import { Command, CommandContext } from '@lib/commands/command.types';
 import { KiwiConfig, KiwiConfigInternal } from '@lib/config/config.types';
 import { parseCommandArgs } from '@lib/core/arg-parser';
+import { capture, exec, prompt } from '@lib/core/executables';
 import { passthrough } from '@lib/core/passthrough';
+import fsTree from '@lib/util/fs-tree';
+import * as fsUtils from '@lib/util/fs-utils';
 import { extractGlobalFlags } from '@lib/util/global-flags';
 import logger from '@lib/util/logger';
+import kiwiPaths, { kiwiPathsGlobal } from '@lib/util/paths';
+import { ContextTools } from '@lib/util/types';
 
 /**
  * Parse raw argv. Strips the node binary and script path.
@@ -38,7 +43,7 @@ export async function dispatch(command: string | undefined, args: string[], conf
     logger.debug('Found handler for command:', resolvedInternalCommand);
     const ctx = resolveCommandContext(handler, args, config);
     logger.debug('Resolved command context:', ctx);
-    return await handler.run(ctx);
+    return await handler.run(ctx, bundleContextTools());
   }
 
   const resolvedExternalCommand = resolveConfigAlias(command, config);
@@ -46,6 +51,21 @@ export async function dispatch(command: string | undefined, args: string[], conf
   const [targetCli, ...params] = [resolveAssociation(resolvedExternalCommand, config), resolvedExternalCommand, ...args].filter(Boolean) as string[];
   const exitCode = await passthrough(targetCli, params);
   process.exitCode = exitCode;
+}
+
+function runScriptCtx( script: string, input: string[], config: KiwiConfigInternal ): CommandContext {
+  return {
+    targetCli: 'kiwi',
+    command: 'run',
+    rawArgs: ['ignored', ...input],
+    positionalArgs: {script: script},
+    options: {list: false},
+    config,
+    exec,
+    capture,
+    prompt,
+    runScript() { return Promise.resolve(); },
+  };
 }
 
 /**
@@ -64,8 +84,14 @@ function resolveCommandContext(command: Command, args: string[], config: KiwiCon
     rawArgs: args,
     positionalArgs,
     options,
-    config
-  }
+    config,
+    exec,
+    capture,
+    prompt,
+    async runScript(scriptName, ...input) {
+      await getCommand('run').run(runScriptCtx(scriptName, input, config), bundleContextTools());
+    },
+  };
 }
 
 /**
@@ -98,4 +124,14 @@ function resolveConfigAlias(command: string, config: KiwiConfig) {
     return resolved;
   }
   return command;
+}
+
+function bundleContextTools(): ContextTools {
+  return {
+    logger,
+    kiwiPaths: kiwiPaths,
+    kiwiPathsGlobal: kiwiPathsGlobal,
+    fsTree: fsTree,
+    fsUtils,
+  }
 }

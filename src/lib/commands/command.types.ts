@@ -1,5 +1,5 @@
 import { KiwiConfigInternal } from '@lib/config/config.types';
-import { ArgType, InferParsed } from '@lib/util/types';
+import { ArgType, ContextExecutables, ContextTools, InferParsed } from '@lib/util/types';
 
 // === Definitions ==============================================
 
@@ -27,13 +27,14 @@ export interface OptionDef {
 export interface CommandContext<
   TArgs extends readonly PositionalArgDef[] = [],
   TOpts extends readonly OptionDef[] = [],
-> {
+> extends ContextExecutables {
   targetCli?: string;
   command: string;
   rawArgs: string[];
   positionalArgs: InferParsed<TArgs>;
   options: InferParsed<TOpts>;
   config: KiwiConfigInternal;
+  runScript(scriptName: string, ...input: string[]): Promise<void>;
 }
 
 // === Command Definition (generic, used at definition site) ====
@@ -53,7 +54,7 @@ export interface CommandDef<
   positionalArgs?: TArgs;
   options?: TOpts;
   advancedConfig?: AdvancedConfigs;
-  run(ctx: CommandContext<TArgs, TOpts>): void | Promise<void>;
+  run(ctx: CommandContext<TArgs, TOpts>, utils: ContextTools): void | Promise<void>;
 }
 
 // === Command (type-erased, used by the registry) =============

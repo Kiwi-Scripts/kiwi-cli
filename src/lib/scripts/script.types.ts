@@ -1,4 +1,4 @@
-import { ArgType, InferParsed } from '@lib/util/types';
+import { ArgType, ContextExecutables, ContextTools, InferParsed } from '@lib/util/types';
 
 // === Input Definition =========================================
 
@@ -14,23 +14,11 @@ export interface ScriptInputDef {
 
 export interface ScriptContext<
   TInput extends readonly ScriptInputDef[] = [],
-> {
+> extends ContextExecutables {
   /** The resolved script name. */
   scriptName: string;
   /** Typed input derived from the script's input definitions. */
   input: InferParsed<TInput>;
-  /** Execute a command with inherited stdio (interactive). */
-  exec(command: string, args?: string[]): Promise<number>;
-  /** Execute a command and capture its stdout/stderr. */
-  capture(command: string, args?: string[]): Promise<CaptureResult>;
-  /** Prompt the user for input. */
-  prompt(message: string, defaultValue?: string): Promise<string>;
-}
-
-export interface CaptureResult {
-  exitCode: number;
-  stdout: string;
-  stderr: string;
 }
 
 // === Script Definition (generic, used at definition site) =====
@@ -42,7 +30,7 @@ export interface ScriptDef<
   name: string;
   description?: string;
   input?: TInput;
-  run(ctx: ScriptContext<TInput>): TOutput | Promise<TOutput>;
+  run(ctx: ScriptContext<TInput>, utils: ContextTools): TOutput | Promise<TOutput>;
 }
 
 // === Script (type-erased, used by the registry) ===============

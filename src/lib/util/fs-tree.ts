@@ -50,10 +50,14 @@ export interface FsTree {
   createDir(dirPath: string): void;
   /** Write a file. Creates parent directories as needed. */
   writeFile(filePath: string, content: string): void;
-  /** Check whether a path exists (considers virtual state in dry-run). */
+  /** Check whether a path exists. */
   exists(targetPath: string): boolean;
-  /** Read a file (considers virtual state in dry-run). */
+  /** Read the contents of a directory. */
+  readDir(dirPath: string): string[];
+  /** Read a file. */
   readFile(filePath: string): string;
+  /** Check whether a path is a file. */
+  isFile(targetPath: string): boolean;
   /** Delete a file or directory. */
   delete(targetPath: string): void;
   /** All recorded actions performed through this tree. */
