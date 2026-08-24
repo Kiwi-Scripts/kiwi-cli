@@ -7,19 +7,28 @@ type LazySingleton = {
 
 function factory<T extends object>(factory: () => T): T {
   let instance: T | null = null;
+  function ensure(): T {
+    return instance ??= factory();
+  }
   return new Proxy<T>({} as T, {
-    get(target, prop, receiver) {
-      if (instance === null) {
-        instance = factory();
-      }
-      return Reflect.get(instance, prop, receiver);
+    get(_, prop) {
+      return Reflect.get(ensure(), prop, ensure());
     },
-    set(target, prop, value, receiver) {
-      if (instance === null) {
-        instance = factory();
-      }
-      return Reflect.set(instance, prop, value, receiver);
-    }
+    set(_, prop, value) {
+      return Reflect.set(ensure(), prop, value, ensure());
+    },
+    getPrototypeOf() {
+        return Object.getPrototypeOf(ensure());
+    },
+    ownKeys() {
+        return Reflect.ownKeys(ensure());
+    },
+    getOwnPropertyDescriptor(_, prop) {
+        return Reflect.getOwnPropertyDescriptor(ensure(), prop);
+    },
+    has(_, prop) {
+      return Reflect.has(ensure(), prop);
+    },
   });
 }
 
