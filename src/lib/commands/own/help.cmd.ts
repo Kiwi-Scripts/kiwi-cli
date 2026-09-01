@@ -159,21 +159,21 @@ function printAttributeDetail(command: Command, name: string): void {
 function printArgEntry(arg: PositionalArgDef, colWidths: ColumnWidths): void {
   const names = arg.name.padEnd(colWidths.name);
   const type = formatType(arg.type);
-  const req = arg.required ? chalk.yellow('*') : colWidths.req ? ' ' : undefined; // only add space if req column exists to keep alignment
-  const label = [names, type, req].join(' ').trimEnd();
+  const req = arg.required ? chalk.yellow('* ') : colWidths.req ? '  ' : undefined; // only add space if req column exists to keep alignment
+  const label = [names, type, req].join('');
   const desc = formatDesc(colWidths, arg.description, arg.default);
 
-  logger.ml.indent.log(`${label} ${chalk.dim('→')} ${desc}`);
+  logger.ml.indent.log(`${label}${chalk.dim('→')} ${desc}`);
 }
 
 function printOptionEntry(opt: OptionDef, colWidths: ColumnWidths): void {
   const names = formatOptionNames(opt).padEnd(colWidths.name);
   const type = formatType(opt.type);
-  const req = opt.required ? chalk.yellow('*') : colWidths.req ? ' ' : undefined; // only add space if req column exists to keep alignment
-  const label = [names, type, req].join(' ');
+  const req = opt.required ? chalk.yellow('* ') : colWidths.req ? '  ' : undefined; // only add space if req column exists to keep alignment
+  const label = [names, type, req].join('');
   const desc = formatDesc(colWidths, opt.description, opt.default);
 
-  logger.ml.indent.log(`${label} ${chalk.dim('→')} ${desc}`);
+  logger.ml.indent.log(`${label}${chalk.dim('→')} ${desc}`);
 }
 
 function formatOptionNames(option: OptionDef): string {
@@ -187,24 +187,25 @@ function formatOptionAliases(option: OptionDef): string {
 
 function formatType(type: 'string' | 'number' | 'boolean'): string {
   switch (type) {
-    case 'string': return chalk.yellow('[str ]');
-    case 'number': return chalk.yellow('[num ]');
-    case 'boolean': return chalk.yellow('[bool]');
+    case 'string': return chalk.yellow('[str ] ');
+    case 'number': return chalk.yellow('[num ] ');
+    case 'boolean': return chalk.yellow('[bool] ');
   }
 }
 
 function formatDesc(colWidths: ColumnWidths, desc: string = '', defaultValue: string | number | boolean | undefined): string {
   if (!desc && !defaultValue) return '';
   const descWidth = colWidths.desc;
-  if (!desc) return formatDefault(defaultValue).padStart(descWidth);
-  const wrapped = wrapText(desc, descWidth);
   const defaultStr = formatDefault(defaultValue);
   const defaultStrLength = displayLength(defaultStr);
+  const defaultStringDeficit = defaultStr.length - defaultStrLength;
+  if (!desc) return defaultStr.padStart(descWidth + defaultStringDeficit);
+  const wrapped = wrapText(desc, descWidth);
   const columnOffsetWidth = colWidths.label;
-  const indent = '-'.repeat(columnOffsetWidth);
+  const indent = ' '.repeat(columnOffsetWidth);
   const lastLine = wrapped.pop()!;
   const formattedLastLine = lastLine.length + defaultStrLength > descWidth
-    ? `${lastLine}\n${indent}${defaultStr.padStart(descWidth)}`
+    ? `${lastLine}\n${indent}${defaultStr.padStart(descWidth + defaultStringDeficit)}`
     : `${lastLine.padEnd(descWidth - defaultStrLength)}${defaultStr}`;
   return [...wrapped, formattedLastLine].join('\n' + indent);
 }
@@ -228,17 +229,16 @@ function calcColumnWidths(command: Command): ColumnWidths {
   const positionalDefs = command.positionalArgs ?? [];
   const optionDefs = command.options ?? [];
   const name = calcNameMinColumnWidth(positionalDefs, optionDefs);
-  const type = 7; // "[type]"
+  const type = 7; // "[type] "
   const req = optionDefs.some(def => def.required) || positionalDefs.some(arg => arg.required) ? 2 : 0; // "*" if any required
-  const label = name + 1 + type + req + 1; // +1 for spaces between columns
+  const label = 2 + name + type + req; // +2 indent; +1 for spaces between columns
   const desc = calcDescMaxColWidth(label);
   return { name, type, req, label, desc };
 }
 
 function calcDescMaxColWidth(labelColWidth: number): number {
   const loggerPrefixLength = logger.prefix.length + 1; // +1 for space after prefix
-  const padding = 2; // space between columns
-  return Math.max(40, MAX_COL_WIDTH - loggerPrefixLength - labelColWidth);
+  return Math.max(40, MAX_COL_WIDTH - loggerPrefixLength - labelColWidth - 2); // -2 for "→ "
 }
 
 function calcNameMinColumnWidth(args: PositionalArgDef[], options: OptionDef[]): number {
@@ -247,5 +247,5 @@ function calcNameMinColumnWidth(args: PositionalArgDef[], options: OptionDef[]):
     const names = formatOptionNames(opt);
     return Math.max(max, names.length);
   }, 0);
-  return Math.max(argWidth, optWidth);
+  return Math.max(argWidth, optWidth) +1;
 }
