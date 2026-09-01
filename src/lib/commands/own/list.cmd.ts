@@ -1,8 +1,8 @@
+import { logger } from '@kiwi-js/cli/api';
 import { getCommandAliases, getCommandsBySource } from '@lib/commands/command.registry';
 import { Command, defineCommand } from '@lib/commands/command.types';
 import { KiwiConfig } from '@lib/config/config.types';
 import { resolveAssociation } from '@lib/core/dispatcher';
-import logger from '@lib/util/logger';
 import chalk from 'chalk';
 
 const listCommand = defineCommand({

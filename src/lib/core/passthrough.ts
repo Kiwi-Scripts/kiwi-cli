@@ -1,4 +1,4 @@
-import logger from '@lib/util/logger';
+import { logger } from '@kiwi-js/cli/api';
 import { spawn } from 'node:child_process';
 
 export function passthrough(targetCli: string, args: string[]): Promise<number> {

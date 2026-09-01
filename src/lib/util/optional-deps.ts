@@ -1,5 +1,5 @@
+import { logger } from '@kiwi-js/cli/api';
 import { OptionalImportError } from '@lib/errors/import.error';
-import logger from '@lib/util/logger';
 import { Prettify } from '@lib/util/types';
 
 const NOT_FOUND = Symbol('NOT_FOUND');

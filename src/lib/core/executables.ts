@@ -1,4 +1,4 @@
-import logger from '@lib/util/logger';
+import { logger } from '@kiwi-js/cli/api';
 import { CaptureResult, ExecutableOptions } from '@lib/util/types';
 import { spawn } from 'node:child_process';
 import rl from 'readline';

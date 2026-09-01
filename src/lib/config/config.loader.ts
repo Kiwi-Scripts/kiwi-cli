@@ -1,10 +1,8 @@
+import { findFileByName, kiwiPathsGlobal, logger } from '@kiwi-js/cli/api';
 import DEFAULT_CONFIG from '@lib/config/config.default';
 import { KiwiConfig, KiwiConfigInternal } from '@lib/config/config.types';
 import { loadModule, MODULE_EXTENSIONS } from '@lib/core/module.loader';
 import { ConfigError } from '@lib/errors/config.error';
-import { findFileByName } from '@lib/util/fs-utils';
-import logger from '@lib/util/logger';
-import { kiwiPathsGlobal } from '@lib/util/paths';
 
 const CONFIG_FILENAME = 'kiwi.config'
 

@@ -1,9 +1,7 @@
+import { fsTree, kiwiPathsGlobal, logger } from '@kiwi-js/cli/api';
 import { loadModule } from '@lib/core/module.loader';
 import { registerScript, ScriptSource } from '@lib/scripts/script.registry';
 import { Script } from '@lib/scripts/script.types';
-import fsTree from '@lib/util/fs-tree';
-import logger from '@lib/util/logger';
-import { kiwiPathsGlobal } from '@lib/util/paths';
 import path from 'node:path';
 
 const GLOBAL_SCRIPT_DIR = kiwiPathsGlobal.resolve([kiwiPathsGlobal.userHome, '.kiwi', 'scripts']);

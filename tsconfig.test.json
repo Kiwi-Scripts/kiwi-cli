@@ -3,11 +3,10 @@
   "compilerOptions": {
     "composite": true,
     "noEmit": true,
-    "baseUrl": "src",
     "paths": {
-      "@commands/*": ["lib/commands/own/*"],
-      "@lib/*": ["lib/*"],
-      "@testutil/*": ["test/util/*"]
+      "@commands/*": ["./src/lib/commands/own/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@testutil/*": ["./src/test/util/*"]
     }
   },
   "include": ["src/test"],

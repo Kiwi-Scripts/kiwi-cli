@@ -1,5 +1,5 @@
-import { defineScript } from '@lib/scripts/script.types';
-import { logger } from 'cli';
+import { defineScript } from '@kiwi-js/cli';
+import { logger } from '@kiwi-js/cli/api';
 
 const confirmYesNoScript = defineScript({
   name: 'confirmYesNo',

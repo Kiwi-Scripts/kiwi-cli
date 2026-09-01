@@ -1,14 +1,10 @@
+import { capture, ensureDir, ensureFile, exec, findFileByName, fsTree, kiwiPaths, kiwiPathsGlobal, logger, prompt } from '@kiwi-js/cli/api';
 import { getCommand, resolveAlias as resolveAliasInternal } from '@lib/commands/command.registry';
 import { Command, CommandContext } from '@lib/commands/command.types';
 import { KiwiConfig, KiwiConfigInternal } from '@lib/config/config.types';
 import { parseCommandArgs } from '@lib/core/arg-parser';
-import { capture, exec, prompt } from '@lib/core/executables';
 import { passthrough } from '@lib/core/passthrough';
-import fsTree from '@lib/util/fs-tree';
-import * as fsUtils from '@lib/util/fs-utils';
 import { extractGlobalFlags } from '@lib/util/global-flags';
-import logger from '@lib/util/logger';
-import kiwiPaths, { kiwiPathsGlobal } from '@lib/util/paths';
 import { ContextTools } from '@lib/util/types';
 
 /**
@@ -132,6 +128,6 @@ function bundleContextTools(): ContextTools {
     kiwiPaths: kiwiPaths,
     kiwiPathsGlobal: kiwiPathsGlobal,
     fsTree: fsTree,
-    fsUtils,
+    fsUtils: {ensureDir, ensureFile, findFileByName},
   }
 }

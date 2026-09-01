@@ -1,8 +1,8 @@
+import { logger } from '@kiwi-js/cli/api';
 import { defineCommand } from '@lib/commands/command.types';
 import { createScriptContext } from '@lib/scripts/script.context';
 import { getAllScripts, getScript } from '@lib/scripts/script.registry';
 import { Script, ScriptInputDef } from '@lib/scripts/script.types';
-import logger from '@lib/util/logger';
 import chalk from 'chalk';
 
 const runCommand = defineCommand({

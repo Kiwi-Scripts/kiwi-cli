@@ -1,7 +1,7 @@
 
+import { logger } from '@kiwi-js/cli/api';
 import { getAllCommands, getCommand, isKnownCommand } from '@lib/commands/command.registry';
 import { Command, defineCommand, OptionDef, PositionalArgDef } from '@lib/commands/command.types';
-import logger from '@lib/util/logger';
 import { displayLength, wrapText } from '@lib/util/string-utils';
 import chalk from 'chalk';
 

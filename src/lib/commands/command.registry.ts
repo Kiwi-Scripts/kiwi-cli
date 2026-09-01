@@ -5,10 +5,10 @@ import listCommand from '@commands/list.cmd';
 import runCommand from '@commands/run.cmd';
 import uuidCommand from '@commands/uuid.cmd';
 import versionCommand from '@commands/version.cmd';
+import { logger } from '@kiwi-js/cli/api';
 import { Command } from '@lib/commands/command.types';
 import { getConfig } from '@lib/config/config.loader';
 import { KiwiConfigInternal } from '@lib/config/config.types';
-import logger from '@lib/util/logger';
 
 export type CommandSource = 'builtin' | 'user-global' | 'user-local';
 
@@ -75,6 +75,6 @@ export function isKnownCommand(name: string): name is KnownCommands {
 }
 
 export async function runHelpCommand(command: string, args: string[], config?: KiwiConfigInternal) {
-  const help = getCommand('help');
-  await help.run({ command, rawArgs: args, config: config ?? getConfig(), positionalArgs: {}, options: {} });
+  const help = getCommand('help') as any;
+  await help.run({ command, rawArgs: args, config: config ?? getConfig(), positionalArgs: {}, options: {} } );
 }

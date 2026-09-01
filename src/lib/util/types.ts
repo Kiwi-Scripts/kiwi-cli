@@ -1,6 +1,4 @@
-import { FsTree } from '@lib/util/fs-tree';
-import { Logger } from '@lib/util/logger';
-import { PathResolver } from '@lib/util/paths';
+import { FsTree, FsUtils, Logger, PathResolver } from '@kiwi-js/cli/api';
 
 export type Prettify<T> = { [K in keyof T]: T[K] } & {};
 
@@ -34,7 +32,7 @@ export interface ContextTools {
   kiwiPaths: PathResolver,
   kiwiPathsGlobal: PathResolver,
   fsTree: FsTree,
-  fsUtils: typeof import('@lib/util/fs-utils'),
+  fsUtils: FsUtils,
 }
 
 export interface ExecutableOptions {

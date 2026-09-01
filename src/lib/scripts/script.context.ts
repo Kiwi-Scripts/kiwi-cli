@@ -1,4 +1,4 @@
-import { capture, exec, prompt } from '@lib/core/executables';
+import { capture, exec, prompt } from '@kiwi-js/cli/api';
 import { Script, ScriptContext } from '@lib/scripts/script.types';
 
 /**

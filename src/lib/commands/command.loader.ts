@@ -1,9 +1,7 @@
+import { fsTree, kiwiPathsGlobal, logger } from '@kiwi-js/cli/api';
 import { CommandSource, registerCommand } from '@lib/commands/command.registry';
 import { Command } from '@lib/commands/command.types';
 import { loadModule } from '@lib/core/module.loader';
-import fsTree from '@lib/util/fs-tree';
-import logger from '@lib/util/logger';
-import { kiwiPathsGlobal } from '@lib/util/paths';
 import path from 'node:path';
 
 const GLOBAL_COMMAND_DIR = kiwiPathsGlobal.resolve([kiwiPathsGlobal.userHome, '.kiwi', 'commands']);

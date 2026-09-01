@@ -1,6 +1,6 @@
+import { logger } from '@kiwi-js/cli/api';
 import { Command, CommandContext, OptionDef } from '@lib/commands/command.types';
 import { ArgParseError } from '@lib/errors/arg-parser.error';
-import logger from '@lib/util/logger';
 
 interface ParsedOptionToken {
   name: string;

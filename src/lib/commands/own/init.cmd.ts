@@ -1,7 +1,6 @@
+import { fsTree, kiwiPaths, kiwiPathsGlobal } from '@kiwi-js/cli/api';
 import { defineCommand } from '@lib/commands/command.types';
 import { loadTemplates } from '@lib/templates/template.loader';
-import fsTree from '@lib/util/fs-tree';
-import { kiwiPaths, kiwiPathsGlobal } from '@lib/util/paths';
 import path from 'node:path';
 
 const initCommand = defineCommand({

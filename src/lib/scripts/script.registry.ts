@@ -1,6 +1,6 @@
+import { logger } from '@kiwi-js/cli/api';
 import confirmYesNoScript from '@lib/scripts/own/confirm.script';
 import { Script } from '@lib/scripts/script.types';
-import logger from '@lib/util/logger';
 
 export type ScriptSource = 'builtin' | 'user-global' | 'user-local';
 

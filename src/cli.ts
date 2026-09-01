@@ -1,16 +1,14 @@
 #!/usr/bin/env node --no-deprecation
 
+import { fsTree, logger } from '@kiwi-js/cli/api';
 import { loadCommands } from '@lib/commands/command.loader';
 import { loadConfig } from '@lib/config/config.loader';
 import { dispatch, parseArgv } from '@lib/core/dispatcher';
 import { CliError } from '@lib/errors/cli.error';
 import { loadScripts } from '@lib/scripts/script.loader';
-import fsTree from '@lib/util/fs-tree';
 import { globalFlags } from '@lib/util/global-flags';
-import logger from '@lib/util/logger';
 import { suppressDEP0190 } from '@lib/util/node-patch';
 import chalk from 'chalk';
-export { fsTree, globalFlags, logger }; // re-export for use in commands and other modules
 suppressDEP0190(); // suppress deprecation warning for passing arguments to a shell sub-process
 
 const {command, args} = parseArgv(process.argv);

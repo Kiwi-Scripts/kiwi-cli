@@ -1,4 +1,4 @@
-import logger from '@lib/util/logger';
+import { logger } from '@kiwi-js/cli/api';
 
 export async function loadTemplates() {
   const mod = await import('templates');

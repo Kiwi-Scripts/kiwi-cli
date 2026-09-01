@@ -1,5 +1,5 @@
+import { logger } from '@kiwi-js/cli/api';
 import { defineCommand } from '@lib/commands/command.types';
-import logger from '@lib/util/logger';
 
 const healthCommand = defineCommand({
   name: 'health',

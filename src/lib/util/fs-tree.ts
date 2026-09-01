@@ -1,7 +1,7 @@
+import { logger } from '@kiwi-js/cli/api';
 import { FileSystemError } from '@lib/errors/fs.error';
 import { globalFlags } from '@lib/util/global-flags';
 import lazySingleton from '@lib/util/lazy-singleton';
-import logger from '@lib/util/logger';
 import chalk from 'chalk';
 import fs from 'node:fs';
 import path from 'node:path';

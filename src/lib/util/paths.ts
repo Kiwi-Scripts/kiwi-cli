@@ -1,4 +1,4 @@
-import fsTree from '@lib/util/fs-tree';
+import { fsTree } from '@kiwi-js/cli/api';
 import lazySingleton from '@lib/util/lazy-singleton';
 import os from 'node:os';
 import path from 'node:path';

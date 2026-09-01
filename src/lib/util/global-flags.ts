@@ -1,4 +1,4 @@
-import logger, { setLogLevel } from '@lib/util/logger';
+import { logger, setLogLevel } from '@kiwi-js/cli/api';
 
 export interface GlobalFlags {
   verbose: boolean;

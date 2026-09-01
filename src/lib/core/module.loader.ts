@@ -1,7 +1,5 @@
+import { ensureFile, fsTree, logger } from '@kiwi-js/cli/api';
 import { ModuleLoadingError } from '@lib/errors/module.error';
-import fsTree from '@lib/util/fs-tree';
-import { ensureFile } from '@lib/util/fs-utils';
-import logger from '@lib/util/logger';
 import { loadOptionalDep } from '@lib/util/optional-deps';
 import path from 'node:path';
 import url from 'node:url';

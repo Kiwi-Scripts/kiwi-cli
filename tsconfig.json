@@ -9,12 +9,16 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "noEmitOnError": true,
-    "baseUrl": "src",
     "paths": {
-      "@commands/*": ["lib/commands/own/*"],
-      "@lib/*": ["lib/*"],
-      "templates": ["lib/templates/template.registry"],
-    }
+      "@commands/*": ["./src/lib/commands/own/*"],
+      "@lib/*": ["./src/lib/*"],
+      "templates": ["./src/lib/templates/template.registry"],
+      "@kiwi-js/cli": ["./src/index.ts"],
+      "@kiwi-js/cli/api": ["./src/api.ts"]
+    },
+    "types": [
+      "node"
+    ]
   },
   "files": [],
   "references": [

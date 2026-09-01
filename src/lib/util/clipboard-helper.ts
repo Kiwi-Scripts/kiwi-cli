@@ -1,4 +1,4 @@
-import logger from '@lib/util/logger';
+import { logger } from '@kiwi-js/cli/api';
 import { tryLoadOptionalDep } from '@lib/util/optional-deps';
 
 export async function copyToClipboard(text: string) {

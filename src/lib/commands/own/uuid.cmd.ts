@@ -1,6 +1,6 @@
+import { logger } from '@kiwi-js/cli/api';
 import { defineCommand } from '@lib/commands/command.types';
 import { copyToClipboard } from '@lib/util/clipboard-helper';
-import logger from '@lib/util/logger';
 import chalk from 'chalk';
 import { v4, v5, v7 } from 'uuid';
 

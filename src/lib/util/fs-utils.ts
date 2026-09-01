@@ -1,6 +1,5 @@
+import { fsTree, logger } from '@kiwi-js/cli/api';
 import { FileSystemError } from '@lib/errors/fs.error';
-import fsTree from '@lib/util/fs-tree';
-import logger from '@lib/util/logger';
 import path from 'node:path';
 
 /**
@@ -42,7 +41,7 @@ export function findFileByName(dirPath: string, fileName: string, extensions?: s
   const candidates = fsTree.readDir(dir);
   const matchingFiles = candidates.filter(candidate => {
     const fullPath = `${dir}/${candidate}`;
-    const isFile = fsTree.host.statSync(fullPath).isFile();
+    const isFile = fsTree.isFile(fullPath);
     if (!isFile) return false;
     if (extensions && !extensions.includes(path.extname(candidate))) return false;
     return candidate.startsWith(fileName);
