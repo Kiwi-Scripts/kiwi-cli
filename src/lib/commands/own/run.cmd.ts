@@ -17,7 +17,7 @@ const runCommand = defineCommand({
   advancedConfig: {
     strict: false,
   },
-  async run(ctx) {
+  async run(ctx, utils) {
     if (ctx.options.list) {
       printAvailableScripts();
       return;
@@ -35,7 +35,7 @@ const runCommand = defineCommand({
 
     const input = resolveScriptInput(script, ctx.rawArgs);
     const scriptCtx = createScriptContext(script, input);
-    await script.run(scriptCtx);
+    await script.run(scriptCtx, utils);
   },
 });
 
