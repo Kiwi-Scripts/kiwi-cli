@@ -16,11 +16,17 @@ interface LoadedScriptModule {
 
 export async function loadScripts() {
   logger.debug('=== SCRIPT LOADER ===');
-  logger.debug('Loading scripts from directories:', GLOBAL_SCRIPT_DIR, LOCAL_SCRIPT_DIR);
+  logger.trace('Loading scripts from directories:', GLOBAL_SCRIPT_DIR, LOCAL_SCRIPT_DIR);
   const scriptModules = await loadScriptModules();
   const validModules = scriptModules.filter(validateScriptModule);
-  if (logger.shouldLog('debug')) logger.ml.debug(`[${validModules.length}] Scripts loaded: ${validModules.map(mod => mod.script.name).join(', ')}`);
   validModules.forEach(mod => registerScript(mod.script, mod.source));
+
+  if (validModules.length === 0) {
+    logger.debug('No external scripts loaded.');
+  } else {
+    logger.debug(`[${validModules.length}] external scripts loaded`)
+    logger.indent.ml.trace(...validModules.map(mod => mod.script.name));
+  }
 }
 
 async function loadScriptModules() {
@@ -33,7 +39,7 @@ async function loadScriptModules() {
         try {
           const mod = await loadModule(abs, { typeSuffix: 'script', extType: ['ts', 'js'], silent: true, requireDefaultExport: true });
           if (mod) {
-            logger.debug(`Loaded script module from file: ${abs}`);
+            logger.trace(`Loaded script module from file: ${abs}`);
             const source: ScriptSource = dir === GLOBAL_SCRIPT_DIR ? 'user-global' : 'user-local';
             scriptModules.push({ filePath: abs, basename: file, script: mod.default, source });
           }
@@ -42,7 +48,7 @@ async function loadScriptModules() {
         }
       }
     } catch (error) {
-      logger.debug(`No script directory found at: ${dir}`);
+      logger.trace(`No script directory found at: ${dir}`);
     }
   }
   return scriptModules;

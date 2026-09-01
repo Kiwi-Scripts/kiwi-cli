@@ -36,9 +36,9 @@ export async function dispatch(command: string | undefined, args: string[], conf
   const resolvedInternalCommand = resolveAliasInternal(command);
   const handler = getCommand(resolvedInternalCommand);
   if (handler) {
-    logger.debug('Found handler for command:', resolvedInternalCommand);
+    logger.trace('Found handler for command:', resolvedInternalCommand);
     const ctx = resolveCommandContext(handler, args, config);
-    logger.debug('Resolved command context:', ctx);
+    logger.ml.trace('Resolved command context:', ctx);
     return await handler.run(ctx, bundleContextTools());
   }
 

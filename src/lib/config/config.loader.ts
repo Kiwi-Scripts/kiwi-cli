@@ -33,21 +33,21 @@ export async function loadConfig() {
   if (projectConfigFile) usedConfigFiles.push(projectConfigFile);
   (finalConfig as KiwiConfigInternal).usedConfigFiles = usedConfigFiles;
 
-  logger.debug('Final merged config:', finalConfig);
+  logger.ml.trace('Final merged config:', finalConfig);
   GLOBAL_CONFIG = finalConfig as KiwiConfigInternal;
   return GLOBAL_CONFIG;
 }
 
 function doFindConfigFile(dir: string) {
-  logger.debug('Checking for config file at:', dir);
+  logger.trace('Checking for config file at:', dir);
   const extensions = Object.values(MODULE_EXTENSIONS).flat();
   const result = findFileByName(dir, CONFIG_FILENAME, extensions);
-  result ? logger.debug(`Found config file: ${result}`) : logger.debug('No config file found.');
+  result ? logger.trace(`Found config file: ${result}`) : logger.trace('No config file found.');
   return result;
 }
 
 async function loadConfigFile(filePath: string) {
-  logger.debug('Loading config module from:', filePath);
+  logger.trace('Loading config module from:', filePath);
   try {
     return loadModule(filePath, { requireDefaultExport: true });
   } catch (error) {
@@ -57,7 +57,7 @@ async function loadConfigFile(filePath: string) {
 }
 
 function mergeConfigs(base: KiwiConfig, override: KiwiConfig) {
-  logger.debug('Merging configs. Base:', base, 'Override:', override);
+  logger.ml.trace('Merging configs. Base:', base, 'Override:', override);
   const merged: KiwiConfig = {
     scriptsDir: override.scriptsDir ?? base.scriptsDir,
     pathLabels: {...base.pathLabels, ...override.pathLabels},
@@ -70,7 +70,7 @@ function mergeConfigs(base: KiwiConfig, override: KiwiConfig) {
 }
 
 function mergeAssociations(base: KiwiConfig['associations'], override: KiwiConfig['associations']) {
-  logger.debug('Merging associations. Base:', base, 'Override:', override);
+  logger.ml.trace('Merging associations. Base:', base, 'Override:', override);
   const merged = {...base};
   if (override) {
     Object.keys(override).forEach(key => {

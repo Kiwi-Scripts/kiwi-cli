@@ -16,11 +16,17 @@ interface LoadedCommandModule {
 
 export async function loadCommands() {
   logger.debug('=== COMMAND LOADER ===');
-  logger.debug('Loading commands from directories:', GLOBAL_COMMAND_DIR, LOCAL_COMMAND_DIR);
+  logger.trace('Loading commands from directories:', GLOBAL_COMMAND_DIR, LOCAL_COMMAND_DIR);
   const commandModules = await loadCommandModules();
   const validModules = commandModules.filter(validateCommandModule);
-  if (logger.shouldLog('debug')) logger.ml.debug(`[${validModules.length}] Commands loaded: ${validModules.map(mod => mod.command.name).join(', ')}`);
   validModules.forEach(mod => registerCommand(mod.command, mod.source));
+  
+  if (validModules.length === 0) {
+    logger.debug('No external commands loaded.');
+  } else {
+    logger.debug(`[${validModules.length}] external commands loaded`)
+    logger.indent.ml.trace(...validModules.map(mod => mod.command.name));
+  }
 }
 
 async function loadCommandModules() {
@@ -35,7 +41,7 @@ async function loadCommandModules() {
         try {
           const mod = await loadModule(abs, { typeSuffix: 'command', extType: ['ts', 'js'], silent: true, requireDefaultExport: true });
           if (mod) {
-            logger.debug(`Loaded command module from file: ${abs}`);
+            logger.trace(`Loaded command module from file: ${abs}`);
             const source = dir === GLOBAL_COMMAND_DIR ? 'user-global' : 'user-local';
             commandModules.push({ filePath: abs, basename: file, command: mod.default, source })
           };
@@ -44,7 +50,7 @@ async function loadCommandModules() {
         }
       }
     } catch (error) {
-      logger.debug(`No command directory found at: ${dir}`);
+      logger.trace(`No command directory found at: ${dir}`);
     }
   }
   return commandModules;

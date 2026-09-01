@@ -4,16 +4,20 @@ import { inspect } from 'node:util';
 
 type LogLevel = keyof typeof logLevelPriority;
 const logLevelPriority = {
-  debug: 10,
-  log: 20,
-  warn: 30,
-  error: 40
+  trace: 10,
+  debug: 20,
+  log: 30,
+  info: 40,
+  warn: 50,
+  error: 60
 } as const;
 
 interface Logger {
   readonly prefix: string;
+  trace(...data: any[]): void;
   debug(...data: any[]): void;
   log(...data: any[]): void;
+  info(...data: any[]): void;
   warn(...data: any[]): void;
   error(...data: any[]): void;
 
@@ -28,8 +32,8 @@ interface Logger {
 }
 
 interface StringLogger extends Logger {
-  debug(...data: string[]): void;
   log(...data: string[]): void;
+  info(...data: string[]): void;
   warn(...data: string[]): void;
   error(...data: string[]): void;
 }
@@ -71,8 +75,10 @@ const defaultConfig: LoggerConfig = {
   channel: ConsoleChannel,
   colorize: true,
   prefixColors: {
-    debug: chalk.gray,
+    trace: chalk.gray,
+    debug: chalk.cyan,
     log: chalk.magenta,
+    info: chalk.magenta,
     warn: chalk.yellow,
     error: chalk.red
   },
@@ -97,8 +103,10 @@ class LoggerInstance implements Logger {
   get indent() { return callableAccessor((amount: number = 2) => new LoggerInstance(this.owner, { ...this.modifiers, indent: (this.modifiers.indent ?? 0) + amount })); }
 
   // Terminal methods — fire and forget, no state to reset
-  debug(...data: any[]) { this.owner.debug(data, this.modifiers); }
+  trace(...data: any[]) { this.owner.verbose('trace', data, this.modifiers); }
+  debug(...data: any[]) { this.owner.verbose('debug', data, this.modifiers); }
   log(...data: any[])   { this.owner.writeWithModifiers('log', data, this.modifiers); }
+  info(...data: any[])  { this.owner.writeWithModifiers('info', data, this.modifiers); }
   warn(...data: any[])  { this.owner.writeWithModifiers('warn', data, this.modifiers); }
   error(...data: any[]) { this.owner.writeWithModifiers('error', data, this.modifiers); }
 
@@ -122,12 +130,9 @@ class LoggerImpl {
 
   }
 
-  debug(data: any[], modifiers: LoggerModifiers = {}) {
-    if (!this.shouldLog('debug')) return; // avoid unnecessary processing for debug messages
-    this.writeWithModifiers('debug', [data
-      .map(d => typeof d === 'string' ? d : inspect(d, { depth: null }))
-      .join(' ')]
-    , modifiers);
+  verbose(lvl: 'debug' | 'trace', data: any[], modifiers: LoggerModifiers = {}) {
+    if (!this.shouldLog(lvl)) return; // avoid unnecessary processing for debug messages
+    this.writeWithModifiers(lvl, data.map(d => typeof d === 'string' ? d : inspect(d, { depth: null })), modifiers);
   }
 
   setLogLevel(level: LogLevel) {
@@ -159,24 +164,29 @@ class LoggerImpl {
     const timestamp = this.getTimestamp();
     const prefix = this.getPrefix(level, modifiers);
     const indent = modifiers.indent ? ' '.repeat(modifiers.indent) : '';
-    if (!modifiers.ml) {
-      const msg = typeof data[0] === 'string' ? data[0] : '';
-      const assembledMsg = `${timestamp}${prefix}${indent}${msg}`.trim();
-      return [this.colorizeMsg(level, assembledMsg), data.slice(1)];
+    if (modifiers.ml) {
+      const mlData = data.flatMap(d => d.split('\n')).map(d => `${timestamp}${prefix}${indent}${d}`).join('\n');
+      return [this.colorizeMsg(level, mlData), []];
     }
-    const mlData = data.flatMap(d => d.split('\n')).map(d => `${timestamp}${prefix}${indent}${d}`).join('\n');
-    return [this.colorizeMsg(level, mlData), []];
+    if (level === 'trace' || level === 'debug') {
+      const msg = data.join(' ');
+      const assembledMsg = `${timestamp}${prefix}${indent}${msg}`.trim();
+      return [this.colorizeMsg(level, assembledMsg), []];
+    }
+    const msg = typeof data[0] === 'string' ? data[0] : '';
+    const assembledMsg = `${timestamp}${prefix}${indent}${msg}`.trim();
+    return [this.colorizeMsg(level, assembledMsg), data.slice(1)];
   }
 
   private colorizeMsg(level: LogLevel, msg: string): string {
-    if (!this.config.colorize || level === 'log') return msg;
-    const colorFn = this.config.prefixColors[level] || ((s: string) => s);
+    if (!this.config.colorize || level === 'log' || level === 'info') return msg;
+    const colorFn = (level === 'debug' || level === 'trace' ? chalk.gray : this.config.prefixColors[level]) || ((s: string) => s);
     return colorFn(msg);
   }
 
   private getTimestamp(): string {
     if (!this.config.showTimestamp) return '';
-    const timestamp = `(${new Date().toISOString()}) `;
+    const timestamp = `(${new Date().toLocaleString('de-DE', {hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric'})}) `;
     return this.config.colorize ? chalk.gray(timestamp) : timestamp;
   }
 
@@ -200,7 +210,7 @@ function setLogLevel(level: LogLevel, loggerInstance: Logger = logger) {
   throw new Error('Cannot set log level on provided logger instance');
 }
 
-function setConfigValue<K extends keyof LoggerConfig>(key: K, value: LoggerConfig[K], loggerInstance: Logger = logger) {
+function setLoggerConfigValue<K extends keyof LoggerConfig>(key: K, value: LoggerConfig[K], loggerInstance: Logger = logger) {
   if (loggerInstance instanceof LoggerInstance) {
     (loggerInstance as LoggerInstance).setConfigValue(key, value);
     return;
@@ -209,6 +219,6 @@ function setConfigValue<K extends keyof LoggerConfig>(key: K, value: LoggerConfi
 }
 
 export default logger;
-export { ConsoleChannel, getLog, NullChannel, setConfigValue, setLogLevel };
+export { ConsoleChannel, getLog, NullChannel, setLoggerConfigValue, setLogLevel };
 export type { LogChannel, Logger, LoggerConfig, LogLevel };
 
